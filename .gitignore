@@ -1,0 +1,9 @@
+#python runtime files
+pyenv/
+__pycache__/
+
+#admin database
+*.sqlite3
+
+#
+
