@@ -32,7 +32,7 @@ DEBUG = True
                         'https://*',]'''
 #CSRF_COOKIE_DOMAIN='*'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
