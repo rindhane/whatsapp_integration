@@ -1,0 +1,24 @@
+{
+    
+    "date_created": "Sat, 08 Jan 2022 15:10:55 +0000",
+    "date_updated": "Sat, 08 Jan 2022 15:10:55 +0000",
+    "date_sent": null,
+    "account_sid": "AC23423424b4454e3asdfdfsadfasfafd",
+    "to": "whatsapp:+9131",
+    "from": "whatsapp:+1416",
+    "messaging_service_sid": null,
+    "body": "Your Yummy Cupcakes Company order of 1 dozen frosted cupcakes has shipped and should be delivered on July 10, 2019. Details: http://www.yummycupcakes.com/",
+    "status": "queued",
+    "num_segments": "1",
+    "num_media": "0",
+    "direction": "outbound-api",
+    "api_version": "2010-04-01",
+    "price": null,
+    "price_unit": null,
+    "error_code": null,
+    "error_message": null,
+    "uri": "/2010-04-01/Accounts/AC23423424b4454e3asdfdfsadfasfafd/Messages/SM98bc6bebd2a449a587d52c0a74d83f85.json",
+    "subresource_uris": {
+        "media": "/2010-04-01/Accounts/AC23423424b4454e3asdfdfsadfasfafd/Messages/SM98bc6besd324xdd23adwersfsd7d52c0a74d83f85/Media.json"
+    }
+}
