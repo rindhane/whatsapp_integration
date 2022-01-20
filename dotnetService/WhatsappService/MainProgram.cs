@@ -17,8 +17,8 @@ namespace WhatsappService
             //building the webservice
             var builder = WebApplication.CreateBuilder(args);
             var app = builder.Build();
-            app.Urls.Add("http://localhost:8080");
-            app.Urls.Add("https://localhost:8000");
+            app.Urls.Add("http://localhost:8080");//change to 8080
+            app.Urls.Add("https://localhost:8000"); //change to 8000
             //instantiating the twilio client
             Client client = new Client();
             //test url endpoints
@@ -33,7 +33,14 @@ namespace WhatsappService
                 //https://timberwolf-mastiff-9776.twil.io/demo-reply
             });
             //url_endpoint to send the notifications to user 
-            app.MapGet("/notification", ()=>
+            app.MapGet("/notification", ( [FromQuery(Name = "name")]string name )=>
+            {   
+                string picture_url=PUBLIC_ADDRESS+"/index.jpg";
+                client.sendMessage(TEMP, $"This is message of {name}", picture_url);
+                Console.WriteLine(name);
+                return new { id = 1 };
+            });
+            app.MapGet("/TrialNotification", ()=>
             {   
                 string picture_url=PUBLIC_ADDRESS+"/index.jpg";
                 client.sendMessage(TEMP, "This is test message", picture_url);

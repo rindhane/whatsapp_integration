@@ -1,0 +1,13 @@
+
+//“Service [Probe.Name] on [Device.Name] is now [Service.Status] ([Service.ProblemDescription])”
+Service Dude1 on Device1 is now down multiple issues
+Service Dude1 on Device2 is now up multiple what issues
+Service Dude1 on Device3 is now right multiple full issue
+Service Dude1 on Device4 is now left multiple something issues
+Service Dude1 on Device4 is now left multiple something issues
+Service Dude1 on Device4 is now left multiple something issues
+Service Dude1 on Device5 is now sustain multiple working all the issues
+Service Dude1 on Device6 is now down with working all the issues
+Service Dude1 on Device6 is now down with working all the issues
+Service Dude1 on Device7 is now down with working all the issues
+Service Dude1 on Device8 is now down with working all the issues
