@@ -5,8 +5,9 @@ __pycache__/
 #admin database
 *.sqlite3
 
-#scripts containing the secrets
+#scripts & database containing the secrets
 startupScript_temp.ps1
+RECORD.db
 
 #buildfolder in dotnet 
 bin/
