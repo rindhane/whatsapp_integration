@@ -2,7 +2,7 @@
 
 CREATE TABLE MessageStatus (
     MessageID TEXT PRIMARY KEY,
-    DialogueID INTEGER,
+    DialogueID TEXT,
     TIME_RECORD TEXT, 
     KIND TEXT,
     MessageText TEXT,
@@ -25,5 +25,5 @@ CREATE TABLE SessionStatus (
     UserID INTEGER,
     Category INTEGER, 
     Stage INTEGER,
-    DialogueID INTEGER
+    DialogueID TEXT
 );

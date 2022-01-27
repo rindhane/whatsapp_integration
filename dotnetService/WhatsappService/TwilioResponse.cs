@@ -53,6 +53,7 @@ namespace WhatsappService{
         public string ProfileName{ get; set; }
         public string WaId { get; set; } 
         public string Body {get; set;}
+        public string ButtonText {get; set;}
         public string To {get; set;}
         public string From {get; set;}
         public int NumSegments {get; set;}
@@ -66,6 +67,8 @@ namespace WhatsappService{
         public static async Task<string> toString(HttpContext context)
         {
             using StreamReader reader = new StreamReader(context.Request.Body);
+            //string temp =  await reader.ReadToEndAsync();
+            //Console.WriteLine(temp);
             return await reader.ReadToEndAsync();
             
         }

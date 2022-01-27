@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using dbSetup;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace WhatsappService
 {
@@ -17,6 +18,10 @@ namespace WhatsappService
             string TEMP=Environment.GetEnvironmentVariable("TEST_NUMBER");
             //building the webservice
             var builder = WebApplication.CreateBuilder(args);
+            //Adding Services
+            builder.Services.AddTransient<IDbModel, DbConnection>();
+            builder.Services.AddSingleton<ImessageClient,Client>();
+            //builder.Configuration
             var app = builder.Build();
             app.Urls.Add("http://localhost:8080");//change to 8080
             app.Urls.Add("https://localhost:8000"); //change to 8000
@@ -41,10 +46,11 @@ namespace WhatsappService
                 Console.WriteLine(name);
                 return new { id = 1 };
             });
-            app.MapGet("/TrialNotification", ()=>
+            app.MapGet("/NewEntryNotification/{id}", (int id)=>
             {   
-                string picture_url=PUBLIC_ADDRESS+"/index.jpg";
-                client.sendMessage(TEMP, "This is test message", picture_url);
+                //string picture_url=PUBLIC_ADDRESS+"/index.jpg";
+                Console.WriteLine(id);
+                client.sendMessage(TEMP,Templates.Greeting_Message(), null);
                 return new { id = 1 };
             });
             //url_endpoint to receive the user responses 
@@ -61,16 +67,17 @@ namespace WhatsappService
         static async Task<string> MessageStatus ( HttpContext context ) {
             string temp = await HandlingPostForm.toString(context);
             Status status = HandlingPostForm.StatusResponse(temp);
-            Console.WriteLine(status);
+            //Console.WriteLine(status);
             return "Checked out";
         }
         //Delegate for handling the message from the user
         [Consumes("application/x-www-form-urlencoded")] 
-        static async Task<string> UserMessage ( HttpContext context ) {
+        static async Task UserMessage ( HttpContext context, ImessageClient client, IDbModel model ) {
             string temp = await HandlingPostForm.toString(context);
             UserMessageContainer response = HandlingPostForm.UserResponse(temp);
-            Console.WriteLine(response.Body);
-            return "Checked out";
+            //Console.WriteLine(response.Body+ $": {response.SmsMessageSid} : {response.ButtonText}");
+            DialogFlow.ConversationHandler(response, client, model);
+            //return "Got it";
         }
         static async Task checkGet (HttpContext contxt)
         {
