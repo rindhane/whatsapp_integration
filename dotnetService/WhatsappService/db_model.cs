@@ -56,7 +56,7 @@ namespace dbSetup{
             connection.Close();
             return false;
         }
-        public long GetUserId(string userPhone) {
+        public object[] GetUserDetails(string userPhone) {
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText = 
@@ -70,14 +70,13 @@ namespace dbSetup{
             {
             object[] arr = new object[4];
             reader.GetValues(arr);
-            long userId=(long)arr[0];
             reader.Close();
             connection.Close();
-            return userId; 
+            return arr; 
             }
             reader.Close();
             connection.Close();
-            return -1;
+            return null;
         }
         public object[] GetSession(long userId) {
             connection.Open();
@@ -121,7 +120,7 @@ namespace dbSetup{
             connection.Close();           
         }
         
-        public void generateSession(MessageRecord record, long userId ,int category) {
+        public void generateSession(MessageRecord record, long userId ,int category , int stage) {
             connection.Open();
             var transaction = connection.BeginTransaction();
             var command=connection.CreateCommand();
@@ -133,11 +132,43 @@ namespace dbSetup{
             command.Parameters.AddWithValue("$value1", $"{DialogFlow.GenerateSessionId().ToString()}");
             command.Parameters.AddWithValue("$value2", $"{userId}");
             command.Parameters.AddWithValue("$value3",$"{category}");
-            command.Parameters.AddWithValue("$value4", $"{0}");
+            command.Parameters.AddWithValue("$value4", $"{stage}");
             command.Parameters.AddWithValue("$value5",$"{record.DialogueID}");
             command.ExecuteNonQuery();
             transaction.Commit();
             connection.Close(); 
+        }
+        public void updateSession(MessageRecord record, object[] parentSession, int nextStage ) {
+            connection.Open();
+            var transaction = connection.BeginTransaction();
+            var command=connection.CreateCommand();
+            command.CommandTimeout = 60;
+            command.CommandText=
+            @"UPDATE SessionStatus
+            set SessionID=$value1, Stage=$value2, DialogueID=$value3
+            where SessionID=$value4 
+            ";
+            command.Parameters.AddWithValue("$value1", $"{DialogFlow.GenerateSessionId().ToString()}");
+            command.Parameters.AddWithValue("$value2", nextStage);
+            command.Parameters.AddWithValue("$value3",record.DialogueID );
+            command.Parameters.AddWithValue("$value4", (string) parentSession[0]);
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            connection.Close();
+        }
+        public void clearSession(string parentSessionId ) {
+            connection.Open();
+            var transaction = connection.BeginTransaction();
+            var command=connection.CreateCommand();
+            command.CommandTimeout = 60;
+            command.CommandText=
+            @"DELETE FROM SessionStatus
+            where SessionID=$value1 
+            ";
+            command.Parameters.AddWithValue("$value1", parentSessionId);
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            connection.Close();
         } 
 
     }

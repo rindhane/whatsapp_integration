@@ -38,9 +38,12 @@ namespace WhatsappService
             MessageRecord messageSent=new MessageRecord();
             messageSent.MessageID=message.Sid;
             messageSent.ReadStatus = message.Status.ToString();
-            messageSent.TIME_RECORD=message.DateSent.ToString();
+            messageSent.TIME_RECORD=message.DateCreated.ToString();
             messageSent.MessageText=message.Body;
-            Console.WriteLine(messageSent.ToString());
+            //DateTime obj = DateTime.ParseExact(messageSent.TIME_RECORD,
+            //                    "dd-MM-yyyy HH:mm:ss", System.Globalization.CultureInfo.CurrentCulture);
+            //Console.WriteLine($"datetime1:{obj.ToString()}");
+            //Console.WriteLine(messageSent.ToString());
             return messageSent;
         }
     }
