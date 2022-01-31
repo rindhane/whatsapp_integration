@@ -9,4 +9,6 @@ $Env:DBNAME="Name.db";
 
 
 #initating the service
-dotnet run --project .\WhatsappService
+#dotnet run --project .\WhatsappService
+cd serviceApp
+.\WhatsappService.exe ;

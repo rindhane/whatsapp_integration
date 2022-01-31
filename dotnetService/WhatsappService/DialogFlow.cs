@@ -143,7 +143,7 @@ namespace WhatsappService {
 
     public class Cat1_stage2:ImessageGenerator{
         
-        private List<string> responses= new List<string> {"a","b","b","d"};
+        private List<string> responses= new List<string> {"a","b","c","d"};
         private string _selection;
         
         public string extractContent(UserMessageContainer response){

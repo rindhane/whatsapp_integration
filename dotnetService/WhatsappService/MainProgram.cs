@@ -23,8 +23,8 @@ namespace WhatsappService
             builder.Services.AddSingleton<ImessageClient,Client>();
             //builder.Configuration
             var app = builder.Build();
-            app.Urls.Add("http://localhost:8080");//change to 8080
-            app.Urls.Add("https://localhost:8000"); //change to 8000
+            app.Urls.Add("http://0.0.0.0:8000");//change to 8000
+            //app.Urls.Add("https://0.0.0.0:8080"); //change to 8080
             //instantiating the twilio client
             Client client = new Client();
             //test url endpoints
