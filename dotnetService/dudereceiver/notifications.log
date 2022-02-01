@@ -1,3 +1,6 @@
 31 Jan 10:32:59: Service  on  is now  () from dude-primary
 31 Jan 10:35:03: Service test on dev is now down (do) from dude-primary
 01 Feb 08:45:45| Service  on  is now  () from dude-primary
+02 Feb 00:43:00: Service switch on  device1(123) is now  down ( no-ping ) from  dude-primary
+02 Feb 00:48:33: Service switch on  device1(123) is now  down ( no-ping ) from  dude-primary
+02 Feb 00:52:09: Service switch on  device1(123) is now  down ( no-ping ) from  dude-primary

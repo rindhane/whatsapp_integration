@@ -156,6 +156,31 @@ namespace dbSetup{
             transaction.Commit();
             connection.Close();
         }
+        public object[] GetUserInGroup(string group ) {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = 
+            @"Select * 
+            FROM users
+            WHERE UserGroup=$group
+            ";
+            command.Parameters.AddWithValue("$group",group);
+            var reader=command.ExecuteReader();
+            object[] result ; 
+            if (reader.Read())
+            {
+            object[] arr = new object[4];
+            reader.GetValues(arr);
+            reader.Close();
+            connection.Close();
+            return arr; 
+            }
+            reader.Close();
+            connection.Close();
+            return null;
+
+            return new object[2];
+        }
         public void clearSession(string parentSessionId ) {
             connection.Open();
             var transaction = connection.BeginTransaction();

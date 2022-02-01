@@ -28,6 +28,7 @@ namespace WhatsappService {
         public void generateSession(MessageRecord record, long userId, int category, int stage);
 
         public void updateSession (MessageRecord record, object[] parentSession, int nextStage );
+        public object[] GetUserInGroup(string group );
 
         public void clearSession (string parentSessionId);
 
@@ -258,8 +259,9 @@ namespace WhatsappService {
                                                   IlogWriter logger,
                                                   string group)
         {
-            //
-            //MessageRecord message=client.sendMessage(host.TEMP, $"This is message of {dat.name}", null); 
+            
+            //get user in the group
+            MessageRecord message=client.sendMessage("user", Notification , null); 
             //logger.writeNotification($"Message sent {message.MessageID} on notification about {dat.device}");
             Console.WriteLine("it runs");// pending
         }

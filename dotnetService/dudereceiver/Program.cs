@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
 using LoggingLib;
+using System.Collections;
 
 namespace dudenotification {
     public class data
@@ -46,16 +47,18 @@ public class notificationReceiver {
             await contxt.Response.WriteAsync(str);
             //return new { id = 1 };
         }
-
-        //[Consumes("application/x-www-form-urlencoded")]
-        [Consumes("application/json")]
-        static async Task checkPost (HttpContext contxt,[FromBody] data dat, IlogWriter logger)
+        //handling text/plain
+        //https://stackoverflow.com/questions/58911465/unsupported-media-type-when-consuming-text-plain
+        //[Consumes("text/plain")]
+        [Consumes("text/plain")]
+        static async Task checkPost (HttpContext contxt, 
+                                        IlogWriter logger)
         {
-            //"Service [Probe.Name] on [Device.Name] is now [Service.Status] ([Service.ProblemDescription])";
-            string str=$"Service {dat.probe} on {dat.device} is now {dat.status} ({dat.description}) from {dat.name}";
             StreamReader reader = new StreamReader(contxt.Request.Body);
-            Console.WriteLine(str);
-            //Console.WriteLine(await reader.ReadToEndAsync());
+            string paramString= await reader.ReadToEndAsync();
+            string[] parameters=paramString.Split(';');
+            //"Service [Probe.Name] on [Device.Name] is now [Service.Status] ([Service.ProblemDescription])"; 
+            string str=$"Service {parameters[0]} on {parameters[1]} is now {parameters[2]} ({parameters[3]}) from {parameters[4]}";
             logger.writeNotification(str);
             await contxt.Response.WriteAsync("result achieved");
             //return new { id = 1 };
