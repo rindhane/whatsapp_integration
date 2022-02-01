@@ -31,6 +31,10 @@ namespace WhatsappService
         public static string wrongResponse(){
             return @"Response was not understood. Please retry";
         }
+        public static string notification_Message(string probe, string device, string status, string description) {
+            return
+            $"Critical Alert Notification:\nService {probe} on {device} is now {status} with the following issue {description}";
+        }
     }   
     
 }

@@ -5,6 +5,9 @@ $Env:TEST_NUMBER="test number for trial";
 $Env:ACCOUNT_NUMBER="whatsapp authorized number";
 $Env:PUBLIC_ADDRESS="http://something.com";
 $Env:DBNAME="Name.db";
+$Env:logFile="notifications.log";
+$Env:httpPort="8000";
+$Env:httpsPort="8080";
 
 
 

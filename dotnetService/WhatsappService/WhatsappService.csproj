@@ -12,4 +12,9 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LoggingLib\LoggingLib.csproj" />
+    <ProjectReference Include="..\dudereceiver\dudereceiver.csproj" />
+  </ItemGroup>
+
 </Project>

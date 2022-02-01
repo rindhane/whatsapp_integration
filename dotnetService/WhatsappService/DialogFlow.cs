@@ -1,6 +1,7 @@
 using System;
 using dbSetup;
 using System.Collections.Generic;
+using LoggingLib;
 
 namespace WhatsappService {
     enum shops{
@@ -83,7 +84,7 @@ namespace WhatsappService {
 
             if (path_select.Equals("1")){
                 Message message=new Message();
-                string PUBLIC_ADDRESS=Environment.GetEnvironmentVariable("PUBLIC_ADDRESS");
+                string PUBLIC_ADDRESS=new HostDetails().PUBLIC_ADDRESS;
             message.content=null;
             message.url=PUBLIC_ADDRESS+"/index.jpg";
                 return message;
@@ -250,6 +251,17 @@ namespace WhatsappService {
             }
             model.clearSession((string) parentSession[0]);
             return;
+        }
+        public static void sendNotificationMessage(string Notification ,
+                                                  ImessageClient client,
+                                                  IDbModel model, 
+                                                  IlogWriter logger,
+                                                  string group)
+        {
+            //
+            //MessageRecord message=client.sendMessage(host.TEMP, $"This is message of {dat.name}", null); 
+            //logger.writeNotification($"Message sent {message.MessageID} on notification about {dat.device}");
+            Console.WriteLine("it runs");// pending
         }
         public static void abruptResponse(string userPhone, 
                                                 ImessageClient client,
