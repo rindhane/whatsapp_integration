@@ -22,15 +22,18 @@ namespace WhatsappService {
     public interface IDbModel {
         public bool IsUser(string userPhone) ;
         public object[] GetUserDetails(string userPhone);
+        public List<Tuple<long,string>> GetUserInGroup(string group );
 
         public object[] GetSession(long userId);
-        public void messageSent(MessageRecord record);
         public void generateSession(MessageRecord record, long userId, int category, int stage);
 
         public void updateSession (MessageRecord record, object[] parentSession, int nextStage );
-        public object[] GetUserInGroup(string group );
-
         public void clearSession (string parentSessionId);
+        public void messageSent(MessageRecord record);
+        public void messageReceived(UserMessageContainer response, string DialogueID);    
+        public void updateStatus(Status status);
+
+        
 
     }
 
@@ -113,12 +116,11 @@ namespace WhatsappService {
         }
     }
 
-    //not under utlization
+    //category to handle notification replies
     public class Cat1_stage1:ImessageGenerator{
         
-        private List<string> responses= new List<string> {};
+        private List<string> responses= new List<string> {"Noted", "Ignore", "Taking-Action"};
         private string _selection;
-        private int production =50;
         
         public string extractContent(UserMessageContainer response){
             _selection=response.ButtonText;
@@ -130,13 +132,13 @@ namespace WhatsappService {
         } 
         public Message message(string[] args){
             Message message=new Message();
-            message.content=Templates.Cat1_stage3(args[0], production);
+            message.content=Templates.Cat1_stage1(args[0]);
             message.url=null;
             return message;
         }
 
         public string[] backend () {
-            return new string[]{"Trial"};
+            return new string[]{_selection};
         }
         public int nextStage(){
             return -1;
@@ -223,9 +225,12 @@ namespace WhatsappService {
         public static void sendOptInMessage(){
             return ;
         }
-        public static void sendGreetingMessage(string userPhone, ImessageClient client, IDbModel model, long userId) {
+        public static void sendGreetingMessage(string userPhone, ImessageClient client, IDbModel model, 
+                                                long userId,
+                                                string dialogueID) 
+        {
             MessageRecord messageRecord = client.sendMessage(userPhone,Templates.Greeting_Message(), null);
-            messageRecord.DialogueID=GenerateDialogId().ToString();
+            messageRecord.DialogueID=dialogueID ; 
             messageRecord.KIND="Outgoing";
             model.messageSent(messageRecord);
             int category = 1;
@@ -240,8 +245,9 @@ namespace WhatsappService {
                                                 object [] parentSession,
                                                 string message, 
                                                 string url,
-                                                int nextStage)
+                                                int nextStage, UserMessageContainer IncomingResponse)
         {
+            model.messageReceived(IncomingResponse, (string)parentSession[4]) ;
             MessageRecord messageRecord = client.sendMessage(userPhone, message, url);
             messageRecord.DialogueID=(string) parentSession[4];
             messageRecord.KIND="Outgoing";
@@ -259,26 +265,50 @@ namespace WhatsappService {
                                                   IlogWriter logger,
                                                   string group)
         {
-            
             //get user in the group
-            MessageRecord message=client.sendMessage("user", Notification , null); 
+            List<Tuple<long,string>> users = model.GetUserInGroup(group);
+            foreach(Tuple<long,string> userDetails in users)
+            {
+                //sending the notifications
+                MessageRecord message=client.sendMessage(userDetails.Item2 , Notification , null);
+                message.DialogueID=GenerateDialogId().ToString();
+                message.KIND="Outgoing";
+                model.messageSent(message);
+                object[] session = GetSession(userDetails.Item1 ,model);
+                //clearing existing session
+                if (session!=null)
+                {
+                    model.clearSession((string)session[0]); //based on SessionID column index in sessionstatus in record database
+                }
+                //this session is part of category 1
+                int cat =1;
+                int stage =1;
+                model.generateSession(message, userDetails.Item1,cat, stage);
+                return ;
+            } 
             //logger.writeNotification($"Message sent {message.MessageID} on notification about {dat.device}");
             Console.WriteLine("it runs");// pending
         }
         public static void abruptResponse(string userPhone, 
                                                 ImessageClient client,
                                                 IDbModel model,
-                                                string sessionId)
+                                                object[] session, UserMessageContainer response)
         {
+            model.messageReceived(response, (string) session[4]);
             MessageRecord messageRecord = client.sendMessage(userPhone, Templates.wrongResponse(), null);
-            model.clearSession(sessionId);
+            messageRecord.DialogueID=(string) session[4];
+            messageRecord.KIND="Outgoing";
+            model.messageSent(messageRecord);
+            model.clearSession((string) session[0]);
         }
         public static void ConversationHandler (UserMessageContainer response, ImessageClient client, IDbModel model ) {
             //authenticate user
             string userPhone="+"+response.WaId;
             if (!IsUser(userPhone,model)) {
                 //send no authorization message;
-                client.sendMessage(userPhone, Templates.noAuth(), null);
+                model.messageReceived(response, GenerateDialogId().ToString());
+                MessageRecord messageRecord = client.sendMessage(userPhone, Templates.noAuth(), null);
+                model.messageSent(messageRecord);
                 return ;
             }
             //after authentication, check is there existing session
@@ -289,7 +319,9 @@ namespace WhatsappService {
             object[] result= GetSession(userId,model);
             //if null send greeting Message
             if (result==null){
-                sendGreetingMessage(userPhone,client, model, userId);
+                string dialogueID = GenerateDialogId().ToString();
+                model.messageReceived(response, dialogueID);
+                sendGreetingMessage(userPhone,client, model, userId,dialogueID);
                 return ;
             }
             //if sessionID get cat & stage
@@ -319,7 +351,7 @@ namespace WhatsappService {
                 }
                 if (stage!=0 && stage!=1 && stage!=2 && stage!=3 )
                 {
-                    abruptResponse(userPhone,client, model, (string) result[0] );
+                    abruptResponse(userPhone,client, model, result, response );
                     return ;
                 }
             }
@@ -327,11 +359,12 @@ namespace WhatsappService {
             if (messageResponse.IsacceptableResponse(messageResponse.extractContent(response))){
                 Message message=messageResponse.message(messageResponse.backend());
                 int nextStage=messageResponse.nextStage();
-                sendResponseMessage(userPhone, client, model, userDetails, result , message.content, message.url, nextStage);
+                sendResponseMessage(userPhone, client, model, userDetails, result , message.content, message.url, 
+                                    nextStage, response);
                 return ;
             }
             //reply for abrupt response messages
-            abruptResponse(userPhone,client, model, (string) result[0] );
+            abruptResponse(userPhone,client, model, result, response );
             return ;
         }
     }

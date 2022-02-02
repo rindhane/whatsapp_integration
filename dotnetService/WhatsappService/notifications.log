@@ -3,3 +3,8 @@
 01 Feb 14:17:20: Message sent SMf85861dc46954e5080e4d75f97df05b9 on notification about 
 01 Feb 14:20:57: Message sent SM21daa8aac4774347a46b576cfbe7c641 on notification about 
 01 Feb 14:43:08: Message sent SM0fd9144856924265b2a12607c16fb568 on notification about device1
+02 Feb 20:45:44: notification> ; ; ;  ; dude-primary
+02 Feb 20:48:12: notification> switch; device1; down; no-ping ; dude-primary
+02 Feb 20:49:15: notification> ; ; ;  ; dude-primary
+02 Feb 20:51:15: notification> switch; device1; down; no-ping ; dude-primary
+02 Feb 21:14:20: notification> switch; device1; down; no-ping ; dude-primary

@@ -51,9 +51,10 @@ namespace WhatsappService
         }
         //Delegate for handling the message-status from the Twilio service
         [Consumes("application/x-www-form-urlencoded")] 
-        static async Task<string> MessageStatus ( HttpContext context ) {
+        static async Task<string> MessageStatus ( HttpContext context, IDbModel model ) {
             string temp = await HandlingPostForm.toString(context);
             Status status = HandlingPostForm.StatusResponse(temp);
+            model.updateStatus(status);
             //Console.WriteLine(status);
             return "Checked out";
         }
@@ -102,7 +103,7 @@ namespace WhatsappService
             string notification = Templates.notification_Message(
                 parameters[0], parameters[1], parameters[2], parameters[4]);
             //only sending the notification to users in  group A
-            string group="Z"; //change to group A
+            string group="Y"; //change to group A
             DialogFlow.sendNotificationMessage(notification,client, model, logger, group);
             await contxt.Response.WriteAsync("notification obtained");
             //return new { id = 1 };

@@ -1,5 +1,7 @@
 using Microsoft.Data.Sqlite;
 using System.IO;
+using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Hosting;
 using WhatsappService;
 namespace dbSetup{
@@ -100,6 +102,7 @@ namespace dbSetup{
             return null;
         }
 
+        //to record the sent message from the client
         public void messageSent(MessageRecord record) {
             connection.Open();
             var transaction = connection.BeginTransaction();
@@ -118,6 +121,49 @@ namespace dbSetup{
             command.ExecuteNonQuery();
             transaction.Commit();
             connection.Close();           
+        }
+        //record of inocming message
+        public void messageReceived(UserMessageContainer response, string DialogueID) {
+            string formatString= "dd-MM-yyyy HH:mm:ss";
+            string KIND= "Incoming";
+            string ReadStatus = "Received";
+            string IncomingText = !String.IsNullOrEmpty(response.ButtonText) ? response.ButtonText : response.Body;
+            connection.Open();
+            var transaction = connection.BeginTransaction();
+            var command=connection.CreateCommand();
+            command.CommandTimeout = 60;
+            command.CommandText=
+            @"INSERT INTO MessageStatus
+            VALUES ($value1, $value2, $value3, $value4, $value5, $value6) 
+            ";
+            command.Parameters.AddWithValue("$value1", $"{response.MessageSid}");
+            var responsed = new UserMessageContainer();
+            command.Parameters.AddWithValue("$value2", $"{DialogueID}"); 
+            command.Parameters.AddWithValue("$value3",$"{DateTime.Now.ToString(formatString)}");
+            command.Parameters.AddWithValue("$value4", $"{KIND}"); 
+            command.Parameters.AddWithValue("$value5",$"{IncomingText}"); 
+            command.Parameters.AddWithValue("$value6",$"{ReadStatus}");
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            connection.Close();
+            return ;           
+        }
+
+        public void updateStatus(Status status){
+            connection.Open();
+            var transaction = connection.BeginTransaction();
+            var command=connection.CreateCommand();
+            command.CommandTimeout = 60;
+            command.CommandText=
+            @"UPDATE MessageStatus
+            SET ReadStatus = $value1
+            WHERE MessageID= $value2 
+            ";
+            command.Parameters.AddWithValue("$value1", $"{status.MessageStatus}");
+            command.Parameters.AddWithValue("$value2", $"{status.MessageSid}");
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            connection.Close();
         }
         
         public void generateSession(MessageRecord record, long userId ,int category , int stage) {
@@ -156,7 +202,7 @@ namespace dbSetup{
             transaction.Commit();
             connection.Close();
         }
-        public object[] GetUserInGroup(string group ) {
+        public List<Tuple<long,string>> GetUserInGroup(string group ) {
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText = 
@@ -166,21 +212,18 @@ namespace dbSetup{
             ";
             command.Parameters.AddWithValue("$group",group);
             var reader=command.ExecuteReader();
-            object[] result ; 
-            if (reader.Read())
+            List<Tuple<long,string>> result =new List<Tuple<long,string>>();
+            while (reader.Read())
             {
-            object[] arr = new object[4];
-            reader.GetValues(arr);
-            reader.Close();
-            connection.Close();
-            return arr; 
+            var temp= new Tuple<long,String>(reader.GetInt64(0),reader.GetString(2));
+            result.Add(temp);
             }
             reader.Close();
             connection.Close();
-            return null;
+            return result;
 
-            return new object[2];
         }
+        
         public void clearSession(string parentSessionId ) {
             connection.Open();
             var transaction = connection.BeginTransaction();

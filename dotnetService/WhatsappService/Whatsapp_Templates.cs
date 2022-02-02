@@ -19,6 +19,11 @@ namespace WhatsappService
         public static string Cat1_stage0(){
             return @"Please enter a character from A to D to select one of the Block.";
         }
+
+        //response to notification reply
+        public static string Cat1_stage1(string lastResponse){
+            return $"Thanks for the response. Your response: “{lastResponse}” has been recorded into the system.";
+        }
         public static string Cat1_stage2(string block){
             return $"You have selected Block-{block.ToUpper()}, Please select one of the shop by entering their respective shop’s indicated number :\n Press-1; BIW-2; Paint-3; TCF-4";
         }

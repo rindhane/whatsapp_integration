@@ -1,7 +1,7 @@
 param($probe, $device, $status, $description);
 
-$Uri = 'http://10.192.65.63:5000/notification';
-
+#$Uri = 'http://10.192.65.63:5000/notification';
+$Uri = 'http://localhost:8000/notification';
 $name="dude-primary";
 $text="$probe; $device; $status; $description ; $name";
 $content="text/plain";
