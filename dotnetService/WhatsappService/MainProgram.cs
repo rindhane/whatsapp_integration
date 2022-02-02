@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using dbSetup;
 using Microsoft.Extensions.DependencyInjection;
-using dudenotification;
 using LoggingLib;
+using System.IO;
 
 namespace WhatsappService
 {
@@ -87,17 +87,20 @@ namespace WhatsappService
             //https://timberwolf-mastiff-9776.twil.io/demo-reply
             await context.Response.WriteAsync("trial succeeded");
         }
-        [Consumes("application/json")]
+        [Consumes("text/plain")]
         static async Task notification(
-                        HttpContext contxt, 
-                        [FromBody] data dat, 
+                        HttpContext contxt,
                         IHostDetails host, 
                         ImessageClient client,
                         IlogWriter logger,
                         IDbModel model )
         {   
-            Console.WriteLine($"response from {dat.name}");
-            string notification = Templates.notification_Message(dat.probe, dat.device, dat.status, dat.description);
+            StreamReader reader = new StreamReader(contxt.Request.Body);
+            string paramString= await reader.ReadToEndAsync();
+            string[] parameters=paramString.Split(';');
+            logger.writeNotification($"notification> {paramString}");
+            string notification = Templates.notification_Message(
+                parameters[0], parameters[1], parameters[2], parameters[4]);
             //only sending the notification to users in  group A
             string group="Z"; //change to group A
             DialogFlow.sendNotificationMessage(notification,client, model, logger, group);

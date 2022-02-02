@@ -59,6 +59,7 @@ public class notificationReceiver {
             string[] parameters=paramString.Split(';');
             //"Service [Probe.Name] on [Device.Name] is now [Service.Status] ([Service.ProblemDescription])"; 
             string str=$"Service {parameters[0]} on {parameters[1]} is now {parameters[2]} ({parameters[3]}) from {parameters[4]}";
+            Console.WriteLine(str);
             logger.writeNotification(str);
             await contxt.Response.WriteAsync("result achieved");
             //return new { id = 1 };

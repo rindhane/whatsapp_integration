@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LoggingLib\LoggingLib.csproj" />
-    <ProjectReference Include="..\dudereceiver\dudereceiver.csproj" />
   </ItemGroup>
 
 </Project>
