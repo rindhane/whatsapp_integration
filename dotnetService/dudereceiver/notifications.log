@@ -6,3 +6,18 @@
 02 Feb 00:52:09: Service switch on  device1(123) is now  down ( no-ping ) from  dude-primary
 02 Feb 16:36:03: Service switch on  device1 is now  down ( no-ping ) from  dude-primary
 02 Feb 16:37:13: Service switch on  device1 is now  down ( no-ping ) from  dude-primary
+04 Feb 16:12:12: Service switch on  device1(123) is now  down  (  no-ping) from 
+04 Feb 16:13:52: Service switch on device1(123) is now down (no-ping) from 
+04 Feb 16:55:14: Service switch on device1(123) is now down (no-ping) from machine-1
+04 Feb 17:01:56: Service switch on device1(123) is now down (no-ping) from machine-1
+04 Feb 17:12:06: Service device1 on 123 is now down (no-ping) from dude-critical
+04 Feb 17:39:58: Service you on work is now asund (asdf) from dude-critical
+04 Feb 17:40:30: Service you on work is now asund (asdf) from dude-critical
+04 Feb 17:47:22: Service asdf on dfad is now adfdf (asdf) from dude-critical
+04 Feb 17:47:36: Service asdf on dfad is now adfdf (asdf) from dude-critical
+04 Feb 19:11:01: Service device61 on 123 is now downy (no-pinglets) from dude-critical
+04 Feb 19:16:14: Service device61 on 123 is now downy (no-pinglets) from dude-critical
+04 Feb 19:20:21: Service switchx on device61 is now 123 (downy) from no-pinglets
+04 Feb 19:23:06: Service [Probe.Name] on [Device.Name] is now [Service.Status] ([Service.ProblemDescription]) from dude-critical
+04 Feb 19:26:11: Service [Probe.Name] on [Device.Name] is now [Service.Status] ([Service.ProblemDescription]) from dude-critical
+04 Feb 19:27:10: Service [servicexyz] on [device1233s] is now [downgoing] ([not-working) from already]

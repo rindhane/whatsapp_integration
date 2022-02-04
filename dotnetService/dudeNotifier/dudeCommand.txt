@@ -1,0 +1,1 @@
+D:\Hexagon\dudeNotifier\dudeNotifier.exe "http://10.192.65.63:5000/notification" [Probe.Name] [Device.Name] [Service.Status] [Service.ProblemDescription] dude-critical;
