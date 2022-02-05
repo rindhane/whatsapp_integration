@@ -2,6 +2,9 @@ using System;
 using dbSetup;
 using System.Collections.Generic;
 using LoggingLib;
+using ProductionService;
+using ChartingLib;
+using System.Threading.Tasks;
 
 namespace WhatsappService {
     enum shops{
@@ -43,7 +46,7 @@ namespace WhatsappService {
         public bool IsacceptableResponse(string arg);
         public Message message(string[] args);
 
-        public string[] backend ();
+        public string[] backend (IHostDetails host, IProductionFetcher productionDb);
         public int nextStage();
         }
     
@@ -64,7 +67,7 @@ namespace WhatsappService {
             message.url=null;
             return message;
         }
-        public string[] backend () {
+        public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
             return new string[]{"",""};
         }
 
@@ -84,13 +87,37 @@ namespace WhatsappService {
             
             return responses.Contains(arg);
         } 
+        
+        public void createChart(string appRoot,
+                                string picPath, 
+                                List<Tuple<String,int>> data)
+        {
+            //inputs
+            string exePath=appRoot+@"chartLib\chartLib.exe";
+            string arg=pycharter.CreateArgString(picPath,data);
+            Console.WriteLine($"arguments passed are ${arg}");
+            //executing the charter executable
+            new pycharter(exePath, arg).buildChart();
+        }
         public Message message(string[] args){
 
             if (path_select.Equals("1")){
+                //fetch data from production service
+                //example data creation
+                var data=new List<Tuple<String,int>>();
+                data.Add(new Tuple<string,int>("A",51));
+                data.Add(new Tuple<string,int>("B",61));
+                data.Add(new Tuple<string,int>("C",41));
+                data.Add(new Tuple<string,int>("D",48));       
+                //from data create imagePlot
+                string imgRelPath="/production.jpg";
+                string imgCompletePath=args[2]+imgRelPath;
+                createChart(appRoot:args[1], picPath:imgCompletePath,data:data);
+                //message creation and return it
                 Message message=new Message();
-                string PUBLIC_ADDRESS=new HostDetails().PUBLIC_ADDRESS;
-            message.content=null;
-            message.url=PUBLIC_ADDRESS+"/index.jpg";
+                message.content=null;
+                message.url=args[0]+imgRelPath;
+                Task.Delay(1000*20);// to make it wait for the chart preparation time of 20 secs
                 return message;
             }
             if (path_select.Equals("2")){
@@ -102,8 +129,9 @@ namespace WhatsappService {
             return new Message();
         }
 
-        public string[] backend () {
-            return new string[]{"",""};
+        public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
+            string PUBLIC_ADDRESS=host.PUBLIC_ADDRESS;
+            return new string[]{PUBLIC_ADDRESS,host.appRoot,host.webRoot};
         }
         public int nextStage(){
             if (path_select.Equals("1")) {
@@ -137,7 +165,7 @@ namespace WhatsappService {
             return message;
         }
 
-        public string[] backend () {
+        public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
             return new string[]{_selection};
         }
         public int nextStage(){
@@ -165,7 +193,7 @@ namespace WhatsappService {
             return message;
         }
 
-        public string[] backend () {
+        public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
             return new string[]{_selection};
         }
         public int nextStage(){
@@ -194,7 +222,7 @@ namespace WhatsappService {
             return message;
         }
 
-        public string[] backend () {
+        public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
             string result=((shops)(int.Parse(_selection)-1)).ToString();
             production=50;
             return new string[]{result};
@@ -301,7 +329,9 @@ namespace WhatsappService {
             model.messageSent(messageRecord);
             model.clearSession((string) session[0]);
         }
-        public static void ConversationHandler (UserMessageContainer response, ImessageClient client, IDbModel model ) {
+        public static async Task<string> ConversationHandler (UserMessageContainer response, ImessageClient client, 
+                                                IDbModel model, IHostDetails host,  
+                                                IProductionFetcher productionDb) {
             //authenticate user
             string userPhone="+"+response.WaId;
             if (!IsUser(userPhone,model)) {
@@ -309,7 +339,7 @@ namespace WhatsappService {
                 model.messageReceived(response, GenerateDialogId().ToString());
                 MessageRecord messageRecord = client.sendMessage(userPhone, Templates.noAuth(), null);
                 model.messageSent(messageRecord);
-                return ;
+                return null;
             }
             //after authentication, check is there existing session
             //get userID
@@ -322,7 +352,7 @@ namespace WhatsappService {
                 string dialogueID = GenerateDialogId().ToString();
                 model.messageReceived(response, dialogueID);
                 sendGreetingMessage(userPhone,client, model, userId,dialogueID);
-                return ;
+                return null ;
             }
             //if sessionID get cat & stage
             long cat=(long) result[2]; //obtaining category from result_session
@@ -352,20 +382,22 @@ namespace WhatsappService {
                 if (stage!=0 && stage!=1 && stage!=2 && stage!=3 )
                 {
                     abruptResponse(userPhone,client, model, result, response );
-                    return ;
+                    return null;
                 }
             }
             //run action function on the selected path
             if (messageResponse.IsacceptableResponse(messageResponse.extractContent(response))){
-                Message message=messageResponse.message(messageResponse.backend());
+                Message message=messageResponse.message(
+                    messageResponse.backend(host,productionDb)
+                    );
                 int nextStage=messageResponse.nextStage();
                 sendResponseMessage(userPhone, client, model, userDetails, result , message.content, message.url, 
                                     nextStage, response);
-                return ;
+                return null;
             }
             //reply for abrupt response messages
             abruptResponse(userPhone,client, model, result, response );
-            return ;
+            return null;
         }
     }
 

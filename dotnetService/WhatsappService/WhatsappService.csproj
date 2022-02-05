@@ -14,6 +14,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LoggingLib\LoggingLib.csproj" />
+    <ProjectReference Include="..\..\pyCharter\pyCharter.csproj" />
+    <ProjectReference Include="..\ProductionFetcher\ProductionFetcher.csproj" />
   </ItemGroup>
 
 </Project>

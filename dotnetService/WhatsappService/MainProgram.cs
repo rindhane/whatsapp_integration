@@ -1,5 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -7,6 +8,7 @@ using dbSetup;
 using Microsoft.Extensions.DependencyInjection;
 using LoggingLib;
 using System.IO;
+using ProductionService;
 
 namespace WhatsappService
 {
@@ -25,6 +27,8 @@ namespace WhatsappService
             builder.Services.AddSingleton<IHostDetails,HostDetails>();
             //instantiating the logger
             builder.Services.AddTransient<IlogWriter, logWriter>();
+            //instantiating the ProductionData connector
+            builder.Services.AddTransient<IProductionFetcher, ProductionFetcher>();
             //builder.Configuration
             var app = builder.Build();
             string? httpPort = Environment.GetEnvironmentVariable("httpPort");
@@ -60,11 +64,13 @@ namespace WhatsappService
         }
         //Delegate for handling the message from the user
         [Consumes("application/x-www-form-urlencoded")] 
-        static async Task UserMessage ( HttpContext context, ImessageClient client, IDbModel model ) {
+        static async Task UserMessage ( HttpContext context, ImessageClient client, IDbModel model,IProductionFetcher productionDb, IHostDetails host, IWebHostEnvironment hostEnvironment ) {
             string temp = await HandlingPostForm.toString(context);
             UserMessageContainer response = HandlingPostForm.UserResponse(temp);
             //Console.WriteLine(response.Body+ $": {response.SmsMessageSid} : {response.ButtonText}");
-            DialogFlow.ConversationHandler(response, client, model);
+            host.appRoot=hostEnvironment.ContentRootPath;
+            host.webRoot=hostEnvironment.WebRootPath;
+            await DialogFlow.ConversationHandler(response, client, model, host ,productionDb);
             //return "Got it";
         }
         static async Task checkGet (HttpContext contxt)
@@ -111,7 +117,6 @@ namespace WhatsappService
         static async Task <object> userRegistration(int id, IHostDetails host, ImessageClient client)
             {   
                 //string picture_url=PUBLIC_ADDRESS+"/index.jpg";
-                Console.WriteLine(id);
                 client.sendMessage(host.TEMP,Templates.Greeting_Message(), null);
                 return new { id = 1 };
             }

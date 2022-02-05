@@ -5,6 +5,10 @@ namespace WhatsappService {
         public string PUBLIC_ADDRESS{get;set;}
         //temp mobile to test receiving the message
         public string? TEMP{get;set;}
+
+        public string? appRoot {get; set;}
+
+        public string? webRoot {get; set;}
     }
 
     //contains the configurations
@@ -13,6 +17,8 @@ namespace WhatsappService {
             public string PUBLIC_ADDRESS{get;set;}
             //temp mobile to test receiving the message
             public string? TEMP{get;set;}
+            public string? appRoot {get; set;}
+            public string? webRoot {get; set;}
             public HostDetails(){
                 
                 PUBLIC_ADDRESS=System.Environment.GetEnvironmentVariable("PUBLIC_ADDRESS");
