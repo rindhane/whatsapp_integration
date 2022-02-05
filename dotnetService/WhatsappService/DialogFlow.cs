@@ -257,7 +257,10 @@ namespace WhatsappService {
                                                 long userId,
                                                 string dialogueID) 
         {
-            MessageRecord messageRecord = client.sendMessage(userPhone,Templates.Greeting_Message(), null);
+            //object[]  userDetails= model.GetUserDetails(userPhone);
+            MessageRecord messageRecord = client.sendMessage(userPhone,
+                                                            Templates.Greeting_Message(), //(string) userDetails[1] for renewed
+                                                             null);
             messageRecord.DialogueID=dialogueID ; 
             messageRecord.KIND="Outgoing";
             model.messageSent(messageRecord);

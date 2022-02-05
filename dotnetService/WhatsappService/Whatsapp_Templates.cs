@@ -12,6 +12,10 @@ namespace WhatsappService
             (1) Consolidated Production Chart
             (2) Check Particular Shop Production";
         }
+        public static string Greeting_Message_renewed(string name) {
+            return
+            $"Hi {name},\nWelcome to M&M MES Updates. Select your option : \n(1) Consolidated Production Chart\n(2) Check Particular Shop Production";
+        }
          public static string Cat0_stage0(string name){
             return $"Hi {name},\nGreetings from the M&M MES Team. Please reply with :\nYes: To Receive the critical alerts from production systems\nStop : To stop receiving any alerts.";
         }

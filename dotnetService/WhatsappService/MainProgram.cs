@@ -107,7 +107,7 @@ namespace WhatsappService
             string[] parameters=paramString.Split(';');
             logger.writeNotification($"notification> {paramString}");
             string notification = Templates.notification_Message(
-                parameters[0], parameters[1], parameters[2], parameters[4]);
+                parameters[0], parameters[1], parameters[2], parameters[3]);
             //only sending the notification to users in  group A
             string group="Y"; //change to group A
             DialogFlow.sendNotificationMessage(notification,client, model, logger, group);
