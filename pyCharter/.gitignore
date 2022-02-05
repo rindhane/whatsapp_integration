@@ -1,0 +1,17 @@
+#python runtime files
+pyenv/
+__pycache__/
+#buildfolder from pyinstaller
+build/
+dist/
+
+
+
+#scripts & database containing the secrets
+
+
+#buildfolder in dotnet 
+bin/
+obj/
+
+
