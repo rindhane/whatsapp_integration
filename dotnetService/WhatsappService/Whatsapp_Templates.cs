@@ -16,8 +16,20 @@ namespace WhatsappService
             return
             $"Hi {name},\nWelcome to M&M MES Updates. Select your option : \n(1) Consolidated Production Chart\n(2) Check Particular Shop Production";
         }
-         public static string Cat0_stage0(string name){
-            return $"Hi {name},\nGreetings from the M&M MES Team. Please reply with :\nYes: To Receive the critical alerts from production systems\nStop : To stop receiving any alerts.";
+
+        public static string Cat0_stage0_optInMessage(string name){
+            return $"Hi {name},\nGreetings from the M&M MES Team. Please reply with : \nYes: To Receive the critical alerts from production systems\nStop : To stop receiving any alerts.";
+        }
+        public static string Cat0_stage0(string option){
+            if (option.Equals("Yes"))
+            {
+                return @"Based on your confirmation, you have been subscribed to alerts"; 
+            }
+            if (option.Equals("Stop"))
+            {
+                return @"Based on your request, you remain unsubscribed"; 
+            }
+            return null;
         }
     
         public static string Cat1_stage0(){

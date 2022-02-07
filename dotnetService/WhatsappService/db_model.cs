@@ -58,6 +58,66 @@ namespace dbSetup{
             connection.Close();
             return false;
         }
+
+        public object[] GetUserIdRegistration(int userID) {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = 
+            @"Select * 
+            FROM REGISTRATION
+            WHERE ID=$userID
+            ";
+            command.Parameters.AddWithValue ("$userID",userID);
+            var reader=command.ExecuteReader();
+            if (reader.Read())
+            {
+            object[] arr = new object[4];
+            reader.GetValues(arr);
+            reader.Close();
+            connection.Close();
+            return arr; 
+            }
+            reader.Close();
+            connection.Close();
+            return null;
+        }
+        public object[] GetRegistrationDetails(string userPhone) {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = 
+            @"Select * 
+            FROM REGISTRATION
+            WHERE Phone=$phone
+            ";
+            command.Parameters.AddWithValue ("$phone",userPhone);
+            var reader=command.ExecuteReader();
+            if (reader.Read())
+            {
+            object[] arr = new object[4];
+            reader.GetValues(arr);
+            reader.Close();
+            connection.Close();
+            return arr; 
+            }
+            reader.Close();
+            connection.Close();
+            return null;
+        }
+        public void DeleteRegistration(long userID)
+        {
+            connection.Open();
+            var transaction = connection.BeginTransaction();
+            var command=connection.CreateCommand();
+            command.CommandTimeout = 60;
+            command.CommandText=
+            @"DELETE FROM REGISTRATION
+            where ID=$value1 
+            ";
+            command.Parameters.AddWithValue("$value1", userID);
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            connection.Close();
+        }
         public object[] GetUserDetails(string userPhone) {
             connection.Open();
             var command = connection.CreateCommand();
@@ -79,6 +139,25 @@ namespace dbSetup{
             reader.Close();
             connection.Close();
             return null;
+        }
+
+        public void AddUser(object[] userDetails)
+        {
+            connection.Open();
+            var transaction = connection.BeginTransaction();
+            var command=connection.CreateCommand();
+            command.CommandTimeout = 60;
+            command.CommandText=
+            @"INSERT INTO USERS
+            VALUES ($ID, $UserName, $Phone, $UserGroup) 
+            ";
+            command.Parameters.AddWithValue("$ID", $"{(long)userDetails[0]}");
+            command.Parameters.AddWithValue("$UserName", $"{(string)userDetails[1]}");
+            command.Parameters.AddWithValue("$Phone",$"{(string)userDetails[2]}");
+            command.Parameters.AddWithValue("$UserGroup", $"{(string)userDetails[3]}");
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            connection.Close();
         }
         public object[] GetSession(long userId) {
             connection.Open();
@@ -136,8 +215,8 @@ namespace dbSetup{
             @"INSERT INTO MessageStatus
             VALUES ($value1, $value2, $value3, $value4, $value5, $value6) 
             ";
+            Console.WriteLine(response.MessageSid+" : responseId");
             command.Parameters.AddWithValue("$value1", $"{response.MessageSid}");
-            var responsed = new UserMessageContainer();
             command.Parameters.AddWithValue("$value2", $"{DialogueID}"); 
             command.Parameters.AddWithValue("$value3",$"{DateTime.Now.ToString(formatString)}");
             command.Parameters.AddWithValue("$value4", $"{KIND}"); 

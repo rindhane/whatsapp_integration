@@ -114,11 +114,10 @@ namespace WhatsappService
             await contxt.Response.WriteAsync("notification obtained");
             //return new { id = 1 };
         }
-        static async Task <object> userRegistration(int id, IHostDetails host, ImessageClient client)
+        static async Task <object> userRegistration(int id, IHostDetails host, ImessageClient client, IDbModel model)
             {   
-                //string picture_url=PUBLIC_ADDRESS+"/index.jpg";
-                client.sendMessage(host.TEMP,Templates.Greeting_Message(), null);
-                return new { id = 1 };
+                DialogFlow.sendOptInMessage(client,model,id);
+                return new { id = id };
             }
     }
 

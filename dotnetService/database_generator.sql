@@ -1,3 +1,4 @@
+--usage .\sqlite3.exe RECORD.db ".read database_generator.sql"
 .open RECORD.db
 
 CREATE TABLE MessageStatus (
@@ -11,14 +12,14 @@ CREATE TABLE MessageStatus (
 --Refer
 --https://stackoverflow.com/questions/5299267/how-to-create-enum-type-in-sqlite
 
-CREATE TABLE USERS (
+CREATE TABLE REGISTRATION (
     ID INTEGER PRIMARY KEY ,
     UserName TEXT,
     Phone TEXT, 
     UserGroup TEXT 
 );
 
-INSERT INTO USERS VALUES (10,"Temp Surname", "+918101", "Z");
+INSERT INTO REGISTRATION VALUES (10,"Temp Surname", "+918101", "Z");
 
 CREATE TABLE SessionStatus (
     SessionID TEXT,
@@ -26,4 +27,11 @@ CREATE TABLE SessionStatus (
     Category INTEGER, 
     Stage INTEGER,
     DialogueID TEXT
+);
+
+CREATE TABLE USERS (
+    ID INTEGER PRIMARY KEY ,
+    UserName TEXT,
+    Phone TEXT, 
+    UserGroup TEXT 
 );

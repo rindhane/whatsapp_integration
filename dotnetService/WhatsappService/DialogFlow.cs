@@ -24,7 +24,12 @@ namespace WhatsappService {
 
     public interface IDbModel {
         public bool IsUser(string userPhone) ;
+
+        public object[] GetUserIdRegistration(int userID);
+        public object[] GetRegistrationDetails (string userPhone);
+        public void DeleteRegistration(long userID);
         public object[] GetUserDetails(string userPhone);
+        public void AddUser(object[] userDetails);
         public List<Tuple<long,string>> GetUserInGroup(string group );
 
         public object[] GetSession(long userId);
@@ -34,9 +39,7 @@ namespace WhatsappService {
         public void clearSession (string parentSessionId);
         public void messageSent(MessageRecord record);
         public void messageReceived(UserMessageContainer response, string DialogueID);    
-        public void updateStatus(Status status);
-
-        
+        public void updateStatus(Status status);       
 
     }
 
@@ -53,9 +56,12 @@ namespace WhatsappService {
     public class Cat0_stage0:ImessageGenerator{
         
         private List<string> responses= new List<string> {"Yes","Stop"};
+        public bool? register{get;set;}
+        public string ?storedResponse;
         
         public string extractContent(UserMessageContainer response){
-            return response.ButtonText;
+            storedResponse=response.ButtonText;
+            return storedResponse;
         }
         public bool IsacceptableResponse(string arg){
             
@@ -68,11 +74,17 @@ namespace WhatsappService {
             return message;
         }
         public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
-            return new string[]{"",""};
+            if (storedResponse==responses[0])//for yes response
+            {
+                register=true;
+                return new string[]{"Yes"};
+            } 
+            register=false;
+            return new string[]{"Stop"}; //only other option
         }
 
         public int nextStage(){
-            return -1;
+            return register==true ? 1 : 0;
         }
     }
     public class Cat1_stage0:ImessageGenerator{
@@ -250,16 +262,84 @@ namespace WhatsappService {
             return Guid.NewGuid();
         }
 
-        public static void sendOptInMessage(){
+        public static void sendOptInMessage(ImessageClient client,
+                                            IDbModel model,int userID)
+        {
+            object [] userDetails=model.GetUserIdRegistration(userID);
+            if (userDetails!=null)
+            {
+            MessageRecord messageRecord = client.sendMessage((string)userDetails[2],
+                                                             Templates.Cat0_stage0_optInMessage((string) userDetails[1]), 
+                                                             null);
+            messageRecord.DialogueID=GenerateDialogId().ToString();
+            messageRecord.KIND="Outgoing";
+            model.messageSent(messageRecord);
+            int category = 0;
+            int stage = 0;
+            model.generateSession(messageRecord,(long) userID, category, stage);
+            }        
+        }
+
+        public static void handleRegistration(UserMessageContainer IncomingResponse, 
+                                                ImessageClient client,
+                                                IDbModel model,
+                                                string userPhone,
+                                                IHostDetails host,  
+                                                IProductionFetcher productionDb)
+        {
+            object[] userDetails= model.GetRegistrationDetails(userPhone);
+            object[] parentSession= GetSession((long)userDetails[0],model);
+            ImessageGenerator messageResponse=new Cat0_stage0();
+            MessageRecord messageRecord;
+            if (messageResponse.IsacceptableResponse(messageResponse.extractContent(IncomingResponse)))
+            {
+                Message message=messageResponse.message(
+                    messageResponse.backend(host,productionDb)
+                    );
+                if (messageResponse.nextStage()==1)
+                {
+                    Console.WriteLine("yes branch was execute");
+                    model.messageReceived(IncomingResponse, (string)parentSession[4]);
+                    
+                    messageRecord = client.sendMessage((string)userDetails[2],
+                                                             message.content, 
+                                                             null);
+                    messageRecord.DialogueID=(string)parentSession[4];
+                    messageRecord.KIND="Outgoing";
+                    model.messageSent(messageRecord);
+                    model.AddUser(userDetails);
+                    model.DeleteRegistration((long)userDetails[0]);
+                    model.clearSession((string)parentSession[0]);
+                    return ;
+                }
+                //action for stop message
+                Console.WriteLine("Stop branch was execute");
+                //model.messageReceived(IncomingResponse, (string)parentSession[4]);
+                messageRecord = client.sendMessage((string)userDetails[2],
+                                                             message.content, 
+                                                             null);
+                messageRecord.DialogueID=(string)parentSession[4];
+                messageRecord.KIND="Outgoing";
+                model.messageSent(messageRecord);
+                return;
+            }
+            //arbitary response
+            //model.messageReceived(IncomingResponse, (string)parentSession[4]);
+            Console.WriteLine("abrupt branch was execute");
+            messageRecord = client.sendMessage(userPhone, Templates.wrongResponse(), null);
+            messageRecord.DialogueID=(string)parentSession[4];
+            messageRecord.KIND="Outgoing";
+            model.messageSent(messageRecord);
             return ;
+
         }
         public static void sendGreetingMessage(string userPhone, ImessageClient client, IDbModel model, 
                                                 long userId,
                                                 string dialogueID) 
         {
-            //object[]  userDetails= model.GetUserDetails(userPhone);
+            object[]  userDetails= model.GetUserDetails(userPhone);
             MessageRecord messageRecord = client.sendMessage(userPhone,
-                                                            Templates.Greeting_Message(), //(string) userDetails[1] for renewed
+                                                            Templates.Greeting_Message_renewed((string) userDetails[1]),
                                                              null);
             messageRecord.DialogueID=dialogueID ; 
             messageRecord.KIND="Outgoing";
@@ -338,9 +418,19 @@ namespace WhatsappService {
             //authenticate user
             string userPhone="+"+response.WaId;
             if (!IsUser(userPhone,model)) {
+                //check if in Registration-Table
+                object[] user=model.GetRegistrationDetails(userPhone);
+                if(user!=null)
+                {
+                    handleRegistration(response,client,model,userPhone,host,productionDb);
+                    return null;
+                }
                 //send no authorization message;
-                model.messageReceived(response, GenerateDialogId().ToString());
+                string DialogueID=GenerateDialogId().ToString();
+                model.messageReceived(response, DialogueID);
                 MessageRecord messageRecord = client.sendMessage(userPhone, Templates.noAuth(), null);
+                messageRecord.DialogueID=DialogueID;
+                messageRecord.KIND="Outgoing";
                 model.messageSent(messageRecord);
                 return null;
             }
