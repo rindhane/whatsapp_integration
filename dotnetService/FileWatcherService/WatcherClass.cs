@@ -1,80 +1,85 @@
-using System.Net.Http.Json;
 using System.Text.Json;
 using System.IO;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Text;
 
 namespace FileWatcherService {
 
 public class WatcherService
 {
 
-    private readonly HttpClient _httpClient;
-    private const string DudeFilePath=@"..\testSample\dudeSample1.txt";
+    private readonly httpSender _httpClient;
+    //primary inputs for filename & api url to send notification 
+    //private const string DudeFilePath=@"..\testSample\Dude_Log.txt";
+    public string DudeFolderPath{get;set;}
+    public string NotificationUrl{get;set;}
+    public string ServiceName{get;set;}
+    //settings for JsonSerialize
     private readonly JsonSerializerOptions _options = new() {
         PropertyNameCaseInsensitive = true
     };
-    //config for WhatsAppService listener url
-    private const string NotificationUrl="http://localhost:7600/notification";//http://localhost:8080/notification
-    public WatcherService(HttpClient httpClient) => _httpClient=httpClient;
-    public async Task<string> GetNotificationAsync()
+    public WatcherService(httpSender sender, string URL) 
     {
-        await Reader(DudeFilePath); 
-        return $"Read the file {DateTime.Now.ToString()}";
-    }
-    public async Task Reader(string path){
-            Console.WriteLine($"string provided: {path}");
-            StreamReader file = File.OpenText(path);
-            for (int i=0; i<Counter.TotalCount(); i++){
-                await file.ReadLineAsync();
-                Console.WriteLine($"Skip Read: {Counter.TotalCount()}");
-            }
-            string line ;
-            while ((line=await file.ReadLineAsync())!=null){
-                Console.WriteLine($"Read : {line}");
-                await sendNotification(line.Substring(0,5)); 
-                Counter temp=new Counter();
-            }
-            file.Close();
-        }
+        _httpClient=sender;
+        _httpClient.NotificationUrl=URL;
 
-    public async Task sendNotification(string line){
-        try
-        {
-        //url preparation
-        string url_with_query=NotificationUrl + $"?name={line}";
-        //send notification
-          HttpResponseMessage response = await _httpClient.GetAsync(url_with_query);
-          response.EnsureSuccessStatusCode();
-          string responseBody=await response.Content.ReadAsStringAsync();
-          Console.WriteLine(responseBody); 
+    }
+
+    
+    public string dudeFilePicker(){
+        RegexFileSelector selector = new RegexFileSelector();
+        var files= Directory.EnumerateFiles(DudeFolderPath,"*.log");
+        foreach (string file in files){
+            if(!System.String.IsNullOrEmpty(selector.findFile(file))){
+                return file; 
+            }
         }
-        catch(HttpRequestException e) 
-        {
-            //Console.WriteLine("\nException Caught!");
-            Console.WriteLine("MessageErro:{0}", e.Message);     
-        }
+        return null;
     }
     
-}
-public class Counter
-{
-      
-        // The static variable count is used to store
-        // the count of objects created.
-        static int count = 0;
+    public async Task GetNotificationAsync(string DudeFilePath, string DateString)
+    {
         
-        // Constructor of the class, in which count
-        // value will be incremented
-        public Counter() 
-        { 
-            count++; 
-        }      
-        // Method totalcount is used to return 
-        // the count variable.
-        public static int TotalCount() 
-        {  
-            return count; 
+        await foreach (resultParams obj in Reader(DudeFilePath, DateString))
+        {
+            await _httpClient.sendNotification(bodyFromParams(obj));
         }
-}
+    }
+    public async IAsyncEnumerable<resultParams> Reader(string filePath, string DateString)
+    {
+        int buffer=1024;
+        FileStream fs= new FileStream(filePath,
+                                        FileMode.Open,
+                                        FileAccess.Read,
+                                        FileShare.ReadWrite,
+                                        buffer, FileOptions.Asynchronous);
+        string line;
+        StreamReader file = new StreamReader(fs, Encoding.UTF8);
+        while (DateString.Equals(System.DateTime.Now.ToShortDateString()))
+            {
+                if ((line=await file.ReadLineAsync())!=null){
+                    yield return PatternExtractor(line);
+                }
+            }
+    }
 
+    public resultParams PatternExtractor(string line)
+        {
+            RegexContentExtractor regPattern = new RegexContentExtractor();
+            resultParams result = regPattern.getParams(line);
+            //System.Console.WriteLine($"0:{result.start},1:{result.probe}, 2:{result.device},3:{result.status},4:{result.description}");
+            return result;
+        }
+    
+    public string bodyFromParams(resultParams obj)
+        {
+            
+            string body = $"{obj.probe};{obj.device};{obj.status};{obj.description};{ServiceName};";
+            return body;
+        }
+    
+}
+    
 
 }

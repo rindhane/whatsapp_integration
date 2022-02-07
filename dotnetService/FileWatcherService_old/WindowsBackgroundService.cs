@@ -19,8 +19,8 @@ public class WindowsBackgroundService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            //string response = await _watcherService.GetNotificationAsync();
-            //_logger.LogWarning(response);
+            string response = await _watcherService.GetNotificationAsync();
+            _logger.LogWarning(response);
             //_logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
             await Task.Delay(System.TimeSpan.FromMinutes(2), stoppingToken);
         }
