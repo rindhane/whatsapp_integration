@@ -395,10 +395,10 @@ namespace WhatsappService {
                 int cat =1;
                 int stage =1;
                 model.generateSession(message, userDetails.Item1,cat, stage);
-                return ;
             } 
             //logger.writeNotification($"Message sent {message.MessageID} on notification about {dat.device}");
             Console.WriteLine("it runs");// pending
+            return ;
         }
         public static void abruptResponse(string userPhone, 
                                                 ImessageClient client,
