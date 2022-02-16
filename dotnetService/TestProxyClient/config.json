@@ -1,0 +1,17 @@
+{
+  "Configs": {
+    "PortDetails": {
+      "Default": "8000"
+    },
+    "Proxy_Details":{
+      "id":"user_1",
+      "proxyUrl":"url",
+      "username":"username",
+      "password":"password",
+      "useProxy":"true"
+    }
+  },
+  "TEST_NUMBER":"+1101010110",
+  "DBNAME":"RECORD.db",
+  "logFile":"notifications.log"
+}
