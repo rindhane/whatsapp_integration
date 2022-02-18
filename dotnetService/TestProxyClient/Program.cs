@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using LoggingLib;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using dbSetup;
 
 namespace ProxyClient {
@@ -19,7 +20,7 @@ namespace ProxyClient {
             //builder.Configuration
             //capturing the confinguration for the same
             builder.Host.ConfigureAppConfiguration((hostingContext,config)=>{
-                config.AddJsonFile("config.json", //change config.json
+                config.AddJsonFile("config_temp.json", //make it config.json
                                     optional:true,
                                     reloadOnChange:true);
             });
@@ -31,6 +32,9 @@ namespace ProxyClient {
             //instantiating the logger
             builder.Services.AddTransient<IlogWriter, logWriter>();
             //getting the builder ready;
+            //add background services 
+            builder.Services.AddSingleton<EscalationService>();
+            builder.Services.AddHostedService<EscalationBackgroundService>();
             var app = builder.Build();
             //extracting the working port
             string? httpPort = app.Services.CreateScope()
@@ -70,9 +74,22 @@ namespace ProxyClient {
             string paramString= await HandlingPostForm.toString(contxt);
             string[] parameters=paramString.Split(';');
             logger.writeNotification($"notification> {paramString}");
+            //extract IP from parameter[1] i.e device name& id for device-id //pending :future work
+            //remove spaces from the string 
+            string status = parameters[2].Replace(" ", String.Empty);
+            string deviceID = parameters[1].Replace(" ", String.Empty);
+            //get the action type from the status(parameters[2]) string
+            int action=Classifiers.statusEncoders(status); 
+            Console.WriteLine($"action:{action}");
+            if (action!=0) //unmapped statuses to actions should not be sent to database
+            {
+                //store parameters into the db
+                model.updateEscalation(deviceID, status, action);
+            }
+            //send instant notification to the group A people
             string notification = Templates.notification_Message(
                 parameters[0], parameters[1], parameters[2], parameters[3]);
-            //only sending the notification to users in  group A
+            //only sending the notification to users in group-level A for instant notification
             string group="A"; //change to group A
             DialogFlow.sendNotificationMessage(notification,client, model, logger, group);
             await contxt.Response.WriteAsync("notification obtained");

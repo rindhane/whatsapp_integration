@@ -91,8 +91,9 @@ namespace ProxyClient {
         public object[] GetRegistrationDetails (string userPhone);
         public void DeleteRegistration(long userID);
         public object[] GetUserDetails(string userPhone);
+        public object[] GetUserDetails(long userID);
         public void AddUser(object[] userDetails);
-        public List<Tuple<long,string>> GetUserInGroup(string group );
+        public List<Tuple<long,string>> GetUserInProductionGroup(string group );
 
         public object[] GetSession(long userId);
         public void generateSession(MessageRecord record, long userId, int category, int stage);
@@ -101,10 +102,26 @@ namespace ProxyClient {
         public void clearSession (string parentSessionId);
         public void messageSent(MessageRecord record);
         public void messageReceived(UserMessageContainer response, string DialogueID);    
-        public void updateStatus(Status status);       
+        public void updateStatus(Status status);
+        public void updateEscalationStatus(string deviceID, string status) ;
+        public void insertEscalation(string deviceID, string status);
+        public void deleteEscalation(string deviceID);
+        public void updateEscalation(string deviceID, string status, int type);
+        public List<Tuple<long,string>> GetUserAlertGroup(string group );
 
     }
 
+    public class Classifiers {
+        public static int statusEncoders(string status)
+        {
+            Dictionary<string,int> statusDict = new Dictionary<string,int>();
+            statusDict.Add("down",1); //bad things to add for monitoring
+            statusDict.Add("up",-1); //ok things to remove from the monitoring
+            int intStatus=0;//out 0 for unkown statuses
+            statusDict.TryGetValue(status.ToLower(), out intStatus);
+            return intStatus;
+        } 
+    }
     public class DialogFlow {
 
         public static void sendNotificationMessage(
@@ -115,7 +132,7 @@ namespace ProxyClient {
              string group)
         {
             //get user in the group
-            List<Tuple<long,string>> users = model.GetUserInGroup(group);
+            List<Tuple<long,string>> users = model.GetUserAlertGroup(group);
             foreach(Tuple<long,string> userDetails in users)
             {
                 //sending the notifications

@@ -124,6 +124,29 @@ namespace dbSetup{
             return null;
         }
 
+        public object[] GetUserDetails(long userID) {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = 
+            @"Select * 
+            FROM users
+            WHERE ID=$value1
+            ";
+            command.Parameters.AddWithValue ("$value1",userID);
+            var reader=command.ExecuteReader();
+            if (reader.Read())
+            {
+            object[] arr = new object[4];
+            reader.GetValues(arr);
+            reader.Close();
+            connection.Close();
+            return arr; 
+            }
+            reader.Close();
+            connection.Close();
+            return null;
+        }
+
         public void AddUser(object[] userDetails)
         {
             connection.Open();
@@ -264,7 +287,127 @@ namespace dbSetup{
             transaction.Commit();
             connection.Close();
         }
-        public List<Tuple<long,string>> GetUserInGroup(string group ) {
+        public List<Tuple<long,string>> GetUserInProductionGroup(string group ) {
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = 
+            @"Select * 
+            FROM ProductionGroup
+            WHERE ProdGroup=$group
+            ";
+            command.Parameters.AddWithValue("$group",group);
+            var reader=command.ExecuteReader();
+            List<long> users =new List<long>();
+            while (reader.Read())
+            {
+            users.Add(reader.GetInt64(1));//storing the ids
+            }
+            reader.Close();
+            connection.Close();
+            List<Tuple<long,string>> result = new List<Tuple<long,string>> (); 
+            foreach(long userID in users)
+            {
+                object[] temp = GetUserDetails(userID);
+                result.Add(new Tuple<long,string>((long)temp[0],(string)temp[2]));
+            }
+            return result;
+        }
+        
+        public void clearSession(string parentSessionId ) {
+            connection.Open();
+            var transaction = connection.BeginTransaction();
+            var command=connection.CreateCommand();
+            command.CommandTimeout = 60;
+            command.CommandText=
+            @"DELETE FROM SessionStatus
+            where SessionID=$value1 
+            ";
+            command.Parameters.AddWithValue("$value1", parentSessionId);
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            connection.Close();
+        }
+
+        public void updateEscalationStatus(string deviceID, string status)
+        {
+            connection.Open();
+            var transaction = connection.BeginTransaction();
+            var command=connection.CreateCommand();
+            command.CommandText=
+            @"UPDATE Escalation
+            SET LAST_STATUS=$value1
+            WHERE ID=$value2
+            ";
+            command.Parameters.AddWithValue("$value1", status);
+            command.Parameters.AddWithValue("$value2", deviceID);
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            connection.Close();
+        }
+        public void insertEscalation(string deviceID, string status){
+            string formatString= "dd-MM-yyyy HH:mm:ss";
+            connection.Open();
+            var transaction = connection.BeginTransaction();
+            var command=connection.CreateCommand();
+            command.CommandTimeout = 60;
+            command.CommandText=
+            @"INSERT INTO Escalation 
+            VALUES ($ID, $TIME_RECORD, $LAST_STATUS ) 
+            ";
+            command.Parameters.AddWithValue("$ID", $"{deviceID}");
+            command.Parameters.AddWithValue("$TIME_RECORD", $"{DateTime.Now.ToString(formatString)}");
+            command.Parameters.AddWithValue("$LAST_STATUS",$"{status}");
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            connection.Close();
+        }
+        public void deleteEscalation(string deviceID)
+        {
+            connection.Open();
+            var transaction = connection.BeginTransaction();
+            var command=connection.CreateCommand();
+            command.CommandTimeout = 60;
+            command.CommandText=
+            @"DELETE FROM Escalation
+            where ID=$value1 
+            ";
+            command.Parameters.AddWithValue("$value1", deviceID);
+            command.ExecuteNonQuery();
+            transaction.Commit();
+            connection.Close();
+
+        } 
+
+        public void updateEscalation(string deviceID, string status, int type)
+        {
+            if (type==-1)
+            {
+                deleteEscalation(deviceID);
+                return;
+            }
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = 
+            @"Select * 
+            FROM Escalation
+            WHERE ID=$deviceID
+            ";
+            command.Parameters.AddWithValue("$deviceID",deviceID);
+            var reader=command.ExecuteReader();
+            if (reader.Read())
+            {
+                reader.Close();
+                connection.Close();
+                updateEscalationStatus(deviceID, status);
+                return ;
+            }
+            reader.Close();
+            connection.Close();
+            insertEscalation(deviceID,status);
+            return ;
+        }
+
+        public List<Tuple<long,string>> GetUserAlertGroup(string group ) {
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText = 
@@ -285,21 +428,6 @@ namespace dbSetup{
             return result;
 
         }
-        
-        public void clearSession(string parentSessionId ) {
-            connection.Open();
-            var transaction = connection.BeginTransaction();
-            var command=connection.CreateCommand();
-            command.CommandTimeout = 60;
-            command.CommandText=
-            @"DELETE FROM SessionStatus
-            where SessionID=$value1 
-            ";
-            command.Parameters.AddWithValue("$value1", parentSessionId);
-            command.ExecuteNonQuery();
-            transaction.Commit();
-            connection.Close();
-        } 
 
     }
 }
