@@ -5,6 +5,7 @@ using dbSetup;
 using System.Collections.Generic;
 using LoggingLib;
 using System;
+using System.Globalization;
 
 namespace ProxyClient {
     public static class Templates {
@@ -108,6 +109,7 @@ namespace ProxyClient {
         public void deleteEscalation(string deviceID);
         public void updateEscalation(string deviceID, string status, int type);
         public List<Tuple<long,string>> GetUserAlertGroup(string group );
+        public List<Tuple<string,string>>GetPendingNotifications();
 
     }
 
@@ -161,4 +163,20 @@ namespace ProxyClient {
         }
     
     } 
+
+    public class DateTimeHelpers
+    {
+        public static string dateStringFormat(){
+            string formatString= "dd-MM-yyyy HH:mm:ss";
+            return formatString;
+        }
+
+        public static DateTime Parser(string s){
+            CultureInfo enIN = CultureInfo.CreateSpecificCulture("en-IN");
+            DateTimeFormatInfo dtfi = enIN.DateTimeFormat;
+            dtfi.ShortDatePattern=dateStringFormat();
+            return DateTime.ParseExact(s,dateStringFormat(),enIN);
+        }
+        
+    }
 }

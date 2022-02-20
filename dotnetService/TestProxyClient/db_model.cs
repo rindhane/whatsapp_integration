@@ -345,7 +345,7 @@ namespace dbSetup{
             connection.Close();
         }
         public void insertEscalation(string deviceID, string status){
-            string formatString= "dd-MM-yyyy HH:mm:ss";
+            string formatString= DateTimeHelpers.dateStringFormat();
             connection.Open();
             var transaction = connection.BeginTransaction();
             var command=connection.CreateCommand();
@@ -427,6 +427,26 @@ namespace dbSetup{
             connection.Close();
             return result;
 
+        }
+
+        public List<Tuple<string,string>>GetPendingNotifications(){
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = 
+            @"Select * 
+            FROM Escalation
+            ";
+            //command.Parameters.AddWithValue("$value",EscalationType);
+            var reader=command.ExecuteReader();
+            List<Tuple<string,string>> result =new List<Tuple<string,string>>();
+            while (reader.Read())
+            {
+            var temp= new Tuple<string,string>(reader.GetString(1),reader.GetString(2)); //passing tuple of (date,last_status)
+            result.Add(temp);
+            }
+            reader.Close();
+            connection.Close();
+            return result;
         }
 
     }
