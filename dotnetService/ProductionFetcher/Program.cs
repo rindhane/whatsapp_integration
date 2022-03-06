@@ -1,14 +1,35 @@
-﻿namespace ProductionService {
-    
-    public interface IProductionFetcher{
+﻿using ProductionQueryLib;
 
-    }
-    public class ProductionFetcher:IProductionFetcher
-    {
-        public ProductionFetcher ()
+namespace ProductionService {
+        public class MainProgram{
+                
+        public static void Main(string[] args) 
         {
-            System.Console.WriteLine("Hello, World!");
+            ProductionFetcher prod=new ProductionFetcher(args[0]);
+            try
+            {
+                System.Console.WriteLine("testing connectivity");
+                prod.testConnection();
+                System.Console.WriteLine("connectivity test done");
+            }
+            catch (System.Exception e)
+            {
+               System.Console.WriteLine($"error:{e.Message}");
+               return ;
+            }
+            try
+            {
+                System.Console.WriteLine("testing productiondata with StoreProceduretext");
+                prod.getProduction();
+                prod.PrintProduction();
+                System.Console.WriteLine("production count test done");
+            }
+            catch (System.Exception e)
+            {
+               System.Console.WriteLine($"error:{e.Message}");
+               return ;
+            }
+
         }
     }
 }
-

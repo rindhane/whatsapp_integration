@@ -1,0 +1,4 @@
+ip=1.1.1.1
+userID=username
+password=password
+db=DBName
