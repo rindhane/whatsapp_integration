@@ -27,7 +27,7 @@ namespace ProductionQueryLib{
         public void countProduction(Dictionary<string,object> line); 
 
     }
-    public class ProductionFetcher:IProductionFetcher
+    public class ProductionFetcherClass:IProductionFetcher
     {
         private string ShopVariable="givenShopName";
         private string platformVariable="platform";
@@ -61,7 +61,7 @@ namespace ProductionQueryLib{
         public readonly SqlConnection connection;
         public readonly string connectionString;
         public readonly string sqlStatement;
-        public ProductionFetcher (string configFileName)
+        public ProductionFetcherClass (string configFileName)
         {
             connectionString=IProductionFetcher.connectionStringReader(configFileName);
             connection= new SqlConnection();

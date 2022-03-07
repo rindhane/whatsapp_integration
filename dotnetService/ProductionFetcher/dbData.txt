@@ -1,4 +1,4 @@
 ip=1.1.1.1
-userID=username
+userID=userid
 password=password
-db=DBName
+db=dbname
