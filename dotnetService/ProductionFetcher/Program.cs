@@ -41,8 +41,13 @@ namespace ProductionService {
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                try
+                {
                 _productiondb.getProduction();
                 _productiondb.PrintProduction();
+                }catch (System.Exception e){
+                    System.Console.WriteLine("DbError:"+e.Message);
+                }
                 //_logger.writeNotification(response);
                 //System.Console.WriteLine(response);
                 //_logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);

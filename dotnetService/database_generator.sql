@@ -39,7 +39,8 @@ CREATE TABLE USERS (
 CREATE TABLE Escalation (
     ID TEXT PRIMARY KEY ,
     TIME_RECORD TEXT,
-    LAST_STATUS TEXT 
+    LAST_STATUS TEXT ,
+    EscalationState INTEGER --create this column --keeps the account of state of the last sent alert message. 
 );
 
 CREATE TABLE ProductionGroup (

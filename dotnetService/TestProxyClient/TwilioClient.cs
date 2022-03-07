@@ -20,7 +20,7 @@ namespace ProxyClient
         public Client (IConfiguration Configuration)
         {
             //client authentication creds
-            string? accountSid= Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID");
+            string? accountSid=Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID");
             string? authToken= Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN"); 
             //get proxy details:
             string? proxyUrl=Configuration["Configs:Proxy_Details:proxyUrl"];

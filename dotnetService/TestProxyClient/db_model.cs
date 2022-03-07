@@ -328,23 +328,24 @@ namespace dbSetup{
             connection.Close();
         }
 
-        public void updateEscalationStatus(string deviceID, string status)
+        public void updateEscalationStatus(string deviceID, string status, long escalationState)
         {
             connection.Open();
             var transaction = connection.BeginTransaction();
             var command=connection.CreateCommand();
             command.CommandText=
             @"UPDATE Escalation
-            SET LAST_STATUS=$value1
-            WHERE ID=$value2
+            SET LAST_STATUS=$value1 , EscalationState=$value2 
+            WHERE ID=$value3
             ";
             command.Parameters.AddWithValue("$value1", status);
-            command.Parameters.AddWithValue("$value2", deviceID);
+            command.Parameters.AddWithValue("$value2", escalationState);
+            command.Parameters.AddWithValue("$value3", deviceID);
             command.ExecuteNonQuery();
             transaction.Commit();
             connection.Close();
         }
-        public void insertEscalation(string deviceID, string status){
+        public void insertEscalation(string deviceID, string status, long escalationState){
             string formatString= DateTimeHelpers.dateStringFormat();
             connection.Open();
             var transaction = connection.BeginTransaction();
@@ -352,11 +353,12 @@ namespace dbSetup{
             command.CommandTimeout = 60;
             command.CommandText=
             @"INSERT INTO Escalation 
-            VALUES ($ID, $TIME_RECORD, $LAST_STATUS ) 
+            VALUES ($ID, $TIME_RECORD, $LAST_STATUS, $STATE ) 
             ";
             command.Parameters.AddWithValue("$ID", $"{deviceID}");
             command.Parameters.AddWithValue("$TIME_RECORD", $"{DateTime.Now.ToString(formatString)}");
             command.Parameters.AddWithValue("$LAST_STATUS",$"{status}");
+            command.Parameters.AddWithValue("$STATE",$"{escalationState}");
             command.ExecuteNonQuery();
             transaction.Commit();
             connection.Close();
@@ -378,7 +380,7 @@ namespace dbSetup{
 
         } 
 
-        public void updateEscalation(string deviceID, string status, int type)
+        public void updateEscalation(string deviceID, string status, int type, long escalationState)
         {
             if (type==-1)
             {
@@ -398,12 +400,12 @@ namespace dbSetup{
             {
                 reader.Close();
                 connection.Close();
-                updateEscalationStatus(deviceID, status);
+                updateEscalationStatus(deviceID, status, escalationState);
                 return ;
             }
             reader.Close();
             connection.Close();
-            insertEscalation(deviceID,status);
+            insertEscalation(deviceID,status,escalationState);
             return ;
         }
 
@@ -429,7 +431,7 @@ namespace dbSetup{
 
         }
 
-        public List<Tuple<string,string>>GetPendingNotifications(){
+        public List<object[]> GetPendingNotifications(){
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText = 
@@ -438,11 +440,14 @@ namespace dbSetup{
             ";
             //command.Parameters.AddWithValue("$value",EscalationType);
             var reader=command.ExecuteReader();
-            List<Tuple<string,string>> result =new List<Tuple<string,string>>();
+            //List<Tuple<string,string>> result =new List<Tuple<string,string>>();
+            List<object[]> result = new List<object[]>();
             while (reader.Read())
             {
-            var temp= new Tuple<string,string>(reader.GetString(1),reader.GetString(2)); //passing tuple of (date,last_status)
-            result.Add(temp);
+                object[] temp  = new object[4];
+                reader.GetValues(temp);
+                //var temp= new Tuple<string,string>(reader.GetString(1),reader.GetString(2)); //passing tuple of (date,last_status)
+                result.Add(temp);
             }
             reader.Close();
             connection.Close();

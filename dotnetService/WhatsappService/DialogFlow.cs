@@ -3,6 +3,7 @@ using dbSetup;
 using System.Collections.Generic;
 using LoggingLib;
 using ProductionService;
+using ProductionQueryLib;
 using ChartingLib;
 using System.Threading.Tasks;
 
@@ -49,7 +50,7 @@ namespace WhatsappService {
         public bool IsacceptableResponse(string arg);
         public Message message(string[] args);
 
-        public string[] backend (IHostDetails host, IProductionFetcher productionDb);
+        public string[] backend (IHostDetails host, ProductionFetcherClass productionDb);
         public int nextStage();
         }
     
@@ -73,7 +74,7 @@ namespace WhatsappService {
             message.url=null;
             return message;
         }
-        public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
+        public string[] backend (IHostDetails host, ProductionFetcherClass productionDb) {
             if (storedResponse==responses[0])//for yes response
             {
                 register=true;
@@ -141,7 +142,7 @@ namespace WhatsappService {
             return new Message();
         }
 
-        public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
+        public string[] backend (IHostDetails host, ProductionFetcherClass productionDb) {
             string PUBLIC_ADDRESS=host.PUBLIC_ADDRESS;
             return new string[]{PUBLIC_ADDRESS,host.appRoot,host.webRoot};
         }
@@ -177,7 +178,7 @@ namespace WhatsappService {
             return message;
         }
 
-        public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
+        public string[] backend (IHostDetails host, ProductionFetcherClass productionDb) {
             return new string[]{_selection};
         }
         public int nextStage(){
@@ -205,7 +206,7 @@ namespace WhatsappService {
             return message;
         }
 
-        public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
+        public string[] backend (IHostDetails host, ProductionFetcherClass productionDb) {
             return new string[]{_selection};
         }
         public int nextStage(){
@@ -234,7 +235,7 @@ namespace WhatsappService {
             return message;
         }
 
-        public string[] backend (IHostDetails host, IProductionFetcher productionDb) {
+        public string[] backend (IHostDetails host, ProductionFetcherClass productionDb) {
             string result=((shops)(int.Parse(_selection)-1)).ToString();
             production=50;
             return new string[]{result};
@@ -285,7 +286,7 @@ namespace WhatsappService {
                                                 IDbModel model,
                                                 string userPhone,
                                                 IHostDetails host,  
-                                                IProductionFetcher productionDb)
+                                                ProductionFetcherClass productionDb)
         {
             object[] userDetails= model.GetRegistrationDetails(userPhone);
             object[] parentSession= GetSession((long)userDetails[0],model);
@@ -414,7 +415,7 @@ namespace WhatsappService {
         }
         public static async Task<string> ConversationHandler (UserMessageContainer response, ImessageClient client, 
                                                 IDbModel model, IHostDetails host,  
-                                                IProductionFetcher productionDb) {
+                                                ProductionFetcherClass productionDb) {
             //authenticate user
             string userPhone="+"+response.WaId;
             if (!IsUser(userPhone,model)) {

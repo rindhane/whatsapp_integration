@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using LoggingLib;
 using System.IO;
 using ProductionService;
+using ProductionQueryLib;
 
 namespace WhatsappService
 {
@@ -28,7 +29,7 @@ namespace WhatsappService
             //instantiating the logger
             builder.Services.AddTransient<IlogWriter, logWriter>();
             //instantiating the ProductionData connector
-            builder.Services.AddTransient<IProductionFetcher, ProductionFetcher>();
+            builder.Services.AddTransient<ProductionFetcherClass>(sp=>new ProductionFetcherClass("dbData.txt"));
             //builder.Configuration
             var app = builder.Build();
             string? httpPort = Environment.GetEnvironmentVariable("httpPort");
@@ -64,7 +65,7 @@ namespace WhatsappService
         }
         //Delegate for handling the message from the user
         [Consumes("application/x-www-form-urlencoded")] 
-        static async Task UserMessage ( HttpContext context, ImessageClient client, IDbModel model,IProductionFetcher productionDb, IHostDetails host, IWebHostEnvironment hostEnvironment ) {
+        static async Task UserMessage ( HttpContext context, ImessageClient client, IDbModel model,ProductionFetcherClass productionDb, IHostDetails host, IWebHostEnvironment hostEnvironment ) {
             string temp = await HandlingPostForm.toString(context);
             UserMessageContainer response = HandlingPostForm.UserResponse(temp);
             //Console.WriteLine(response.Body+ $": {response.SmsMessageSid} : {response.ButtonText}");

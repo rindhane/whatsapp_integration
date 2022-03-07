@@ -1,4 +1,5 @@
 #client secrets
 config_temp.json
+dbData.txt
 #notifications log
 notifications.log

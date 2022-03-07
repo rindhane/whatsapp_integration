@@ -97,7 +97,7 @@ namespace ProductionQueryLib{
                 line.Add(ShopVariable,reader.GetString(2));
                 line.Add(platformVariable,reader.GetString(3));
                 line.Add(countVariable, reader.GetDecimal(7)); //confirm the int used in the read
-                System.Console.WriteLine("Transaction: {0} {1} {2} ", reader.GetString(0), reader.GetString(1), reader.GetDecimal(7));
+                //System.Console.WriteLine("Transaction: {0} {1} {2} ", reader.GetString(0), reader.GetString(1), reader.GetDecimal(7));
                 countProduction(line);
             }
             connection.Close();

@@ -13,6 +13,11 @@ namespace ProxyClient {
             return
             $"Critical Alert Notification:\nService {probe} on {device} is now {status} with the following issue {description}";
         }
+
+        public static string escalation_Message(string device, string time){
+            return 
+            $"Alert Notification:\n{device} has been down for following time {time}";
+        }
     }
 
     public static class HandlingPostForm 
@@ -104,12 +109,12 @@ namespace ProxyClient {
         public void messageSent(MessageRecord record);
         public void messageReceived(UserMessageContainer response, string DialogueID);    
         public void updateStatus(Status status);
-        public void updateEscalationStatus(string deviceID, string status) ;
-        public void insertEscalation(string deviceID, string status);
+        public void updateEscalationStatus(string deviceID, string status, long escalationState) ;
+        public void insertEscalation(string deviceID, string status, long escalationState);
         public void deleteEscalation(string deviceID);
-        public void updateEscalation(string deviceID, string status, int type);
+        public void updateEscalation(string deviceID, string status, int type, long escalationState);
         public List<Tuple<long,string>> GetUserAlertGroup(string group );
-        public List<Tuple<string,string>>GetPendingNotifications();
+        public List<object[]> GetPendingNotifications();
 
     }
 

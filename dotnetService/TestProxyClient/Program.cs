@@ -9,6 +9,8 @@ using LoggingLib;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using dbSetup;
+using ProductionService;
+using ProductionQueryLib;
 
 namespace ProxyClient {
     public class MainProgram {
@@ -20,7 +22,7 @@ namespace ProxyClient {
             //builder.Configuration
             //capturing the confinguration for the same
             builder.Host.ConfigureAppConfiguration((hostingContext,config)=>{
-                config.AddJsonFile("config_temp.json", //make it config.json
+                config.AddJsonFile("config.json", //make it config.json
                                     optional:true,
                                     reloadOnChange:true);
             });
@@ -31,6 +33,9 @@ namespace ProxyClient {
             builder.Services.AddTransient<IDbModel, DbConnection>();
             //instantiating the logger
             builder.Services.AddTransient<IlogWriter, logWriter>();
+            //instantiating the ProductionDataServices
+            builder.Services.AddTransient<ProductionFetcherClass>(sp=> new ProductionFetcherClass("dbData.txt"));
+            builder.Services.AddHostedService<ProductionFetcherService>();           
             //getting the builder ready;
             //add background services 
             builder.Services.AddSingleton<EscalationService>();
@@ -83,8 +88,9 @@ namespace ProxyClient {
             Console.WriteLine($"action:{action}");
             if (action!=0) //unmapped statuses to actions should not be sent to database
             {
+                long escalationState=0;
                 //store parameters into the db
-                model.updateEscalation(deviceID, status, action);
+                model.updateEscalation(deviceID, status, action,escalationState);
             }
             //send instant notification to the group A people
             string notification = Templates.notification_Message(

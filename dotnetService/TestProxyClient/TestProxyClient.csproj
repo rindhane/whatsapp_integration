@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="6.0.0" />
+    <ProjectReference Include="..\ProductionFetcher\ProductionFetcher.csproj" />
   </ItemGroup>
 
 </Project>
