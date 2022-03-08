@@ -2,6 +2,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 
 namespace ProductionQueryLib{
@@ -131,6 +132,11 @@ namespace ProductionQueryLib{
             //addition of new block and its entry 
             countRecord.Add(BlockName, new Dictionary<string,int>{{platform,count}});
             return ;
+        }
+
+        public string getProductionCountString(){
+            getProduction();
+            return JsonConvert.SerializeObject(countRecord);
         }
 
         public void PrintProduction ()

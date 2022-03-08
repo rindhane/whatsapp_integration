@@ -3,6 +3,7 @@ using ProductionQueryLib;
 using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
+using TransferClient;
 
 namespace ProductionService {
     public class TestProgram
@@ -43,8 +44,13 @@ namespace ProductionService {
             {
                 try
                 {
-                _productiondb.getProduction();
-                _productiondb.PrintProduction();
+                //_productiondb.getProduction();
+                //_productiondb.PrintProduction();
+                string result = _productiondb.getProductionCountString();
+                string URL = "http://localhost:8000/productionData";
+                SimpleClient client = new SimpleClient(URL);
+                await client.postJson(result); 
+                System.Console.WriteLine($"Production Snapshot: {result}");
                 }catch (System.Exception e){
                     System.Console.WriteLine("DbError:"+e.Message);
                 }

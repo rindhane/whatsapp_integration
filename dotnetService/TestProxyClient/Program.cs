@@ -11,6 +11,8 @@ using Microsoft.Extensions.Hosting;
 using dbSetup;
 using ProductionService;
 using ProductionQueryLib;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace ProxyClient {
     public class MainProgram {
@@ -50,12 +52,13 @@ namespace ProxyClient {
             app.MapGet( "/" , () => "Welcome to the main portal");
             app.MapPost("/trialMessage", trialMessage);
             app.MapPost("/notification", notification);
+            app.MapPost("/productionData", getProductionData);
             app.MapPost("/UserMessage", ()=>"result achieved");
             app.MapPost("/MessageStatus", ()=>"status received");
             //to serve files
             app.UseStaticFiles();
             //start the worker service
-            app.Run(); 
+            app.Run();
         }
         [Consumes("text/plain")]
         static async Task trialMessage (HttpContext context, 
@@ -99,6 +102,26 @@ namespace ProxyClient {
             string group="A"; //change to group A
             DialogFlow.sendNotificationMessage(notification,client, model, logger, group);
             await contxt.Response.WriteAsync("notification obtained");
+            //return new { id = 1 };
+        }
+        //[Consumes("text/plain")]
+        [Consumes("application/json")]
+        static async Task getProductionData([FromBody] Dictionary<string,Dictionary<string, int>> result, 
+                                            HttpContext contxt,
+                                            ImessageClient client,
+                                            IlogWriter logger,
+                                            IDbModel model)
+        {
+            //StreamReader reader = new StreamReader(contxt.Request.Body);
+            //string paramString= await reader.ReadToEndAsync();
+            logger.writeNotification($"productionData> {JsonConvert.SerializeObject(result)}");
+            //generate production Message for People to the group A people
+            //all persons are withing the group A
+            string group="A";
+            //currently there is no production segregation strategy write function for it.  
+            string notification = Templates.productionUpdate_message(result);
+            DialogFlow.sendProductionUpdate(notification,client, model, logger, group);
+            await contxt.Response.WriteAsync("production details Updated");
             //return new { id = 1 };
         }
     }
