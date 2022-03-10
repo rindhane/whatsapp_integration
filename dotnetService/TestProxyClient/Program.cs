@@ -13,6 +13,7 @@ using ProductionService;
 using ProductionQueryLib;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using proxyArrangement;
 
 namespace ProxyClient {
     public class MainProgram {
@@ -42,6 +43,10 @@ namespace ProxyClient {
             //add background services 
             builder.Services.AddSingleton<EscalationService>();
             builder.Services.AddHostedService<EscalationBackgroundService>();
+            //add proxy monitoring (arangement to keep the token alive)
+            builder.Services.AddSingleton<ChromiumSession>();
+            builder.Services.AddHostedService<ProxyActiveService>();
+            //build the app
             var app = builder.Build();
             //extracting the working port
             string? httpPort = app.Services.CreateScope()
