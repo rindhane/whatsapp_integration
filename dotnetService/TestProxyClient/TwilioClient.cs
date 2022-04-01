@@ -15,13 +15,13 @@ namespace ProxyClient
 
         private HttpClient _httpClient;
         private TwilioRestClient twilioRestClient;
-        private string accountNumber=Environment.GetEnvironmentVariable("ACCOUNT_NUMBER");
+        private string accountNumber= Environment.GetEnvironmentVariable("ACCOUNT_NUMBER");
         //constructor purpose is to instantiate the twilio api client
         public Client (IConfiguration Configuration)
         {
             //client authentication creds
-            string? accountSid=Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID");
-            string? authToken=Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN"); 
+            string? accountSid= Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID");
+            string? authToken= Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN"); 
             //get proxy details:
             string? proxyUrl=Configuration["Configs:Proxy_Details:proxyUrl"];
             string? ProxyUsername=Configuration["Configs:Proxy_Details:username"];

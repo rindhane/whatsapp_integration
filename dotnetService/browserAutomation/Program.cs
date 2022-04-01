@@ -3,6 +3,7 @@ using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
 using OpenQA.Selenium.IE;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Remote;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -17,40 +18,56 @@ namespace proxyArrangement
             System.Console.WriteLine("Hello, World!");
             //InternetExplorerSession client = new InternetExplorerSession();
             ChromiumSession client = new ChromiumSession();
-
             client.startAction();
+            //InternetExplorerSession clientIE=new InternetExplorerSession();
+            //clientIE.startAction();
+            client.closeSession();
+            //clientIE.closeSession();
         }
         
     }
 
     public class InternetExplorerSession {
+        public InternetExplorerDriver driver ;
+
 
         public InternetExplorerSession(){
-
+            //new DriverManager().SetUpDriver(new InternetExplorerConfig());
+            var options = new InternetExplorerOptions();
+            options.IgnoreZoomLevel=true;
+            driver = new InternetExplorerDriver(@"C:\Webdriver\IE\bin",options);
+            driver.Navigate().GoToUrl("https://www.mahindrarise.com");
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(500);   
         }
         public void startAction()
         {
-            new DriverManager().SetUpDriver(new InternetExplorerConfig());
-            var options = new InternetExplorerOptions();
-            var driver = new InternetExplorerDriver(options);
+          driver.Navigate().Refresh();
+        }
+        public void closeSession()
+        {
             driver.Quit();
+            driver.Dispose();
         }
 
     }
     public class ChromiumSession {
+        public ChromeDriver driver ;
 
-        public ChromiumSession(){
-
+        public ChromiumSession()
+        {
+            //new DriverManager().SetUpDriver(new ChromeConfig());
         }
         public void startAction()
         {
-            //new DriverManager().SetUpDriver(new ChromeConfig());
             var options = new ChromeOptions();
             options.BinaryLocation= @"C:\portapps\ungoogled-chromium-portable\app\chrome.exe";
-            var driver = new ChromeDriver(@"C:\WebDriver\bin", options);
+            driver = new ChromeDriver(@"C:\WebDriver\bin", options);
             driver.Navigate().GoToUrl("https://www.mahindra.com");
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(500);
-            Task.Delay(TimeSpan.FromSeconds(30));
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromMilliseconds(1000);
+            //driver.Navigate().Refresh();
+        }
+        public void closeSession()
+        {
             driver.Quit();
         }
     }
@@ -73,6 +90,8 @@ namespace proxyArrangement
                 try
                 {
                     _client.startAction();
+                    await Task.Delay(System.TimeSpan.FromSeconds(5), stoppingToken);
+                    _client.closeSession();
                     System.Console.WriteLine($"Proxy was approached: {DateTime.Now.ToString()}");
                 }catch (System.Exception e){
                     System.Console.WriteLine("ProxyError:"+e.Message);
@@ -80,7 +99,7 @@ namespace proxyArrangement
                 //_logger.writeNotification(response);
                 //System.Console.WriteLine(response);
                 //_logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(System.TimeSpan.FromSeconds(30), stoppingToken);
+                await Task.Delay(System.TimeSpan.FromSeconds(15), stoppingToken);
             }
         }
      }   

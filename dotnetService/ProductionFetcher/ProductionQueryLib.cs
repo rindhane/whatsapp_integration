@@ -25,7 +25,7 @@ namespace ProductionQueryLib{
         public void testConnection();
         public void getProduction();
 
-        public void countProduction(Dictionary<string,object> line); 
+        public void countProduction(Dictionary<string,object> line, Dictionary<string,Dictionary<string,int>> workingRecord); 
 
     }
     public class ProductionFetcherClass:IProductionFetcher
@@ -87,6 +87,7 @@ namespace ProductionQueryLib{
         }
 
         public void getProduction(){
+            Dictionary<string,Dictionary<string,int>> workingRecord =new Dictionary<string,Dictionary<string,int>>() ; // since dependecy injection is not creating new countRecord dictionary 
             connection.Open();
             SqlCommand cmd =new SqlCommand(sqlStatement,connection);
             cmd.CommandType = CommandType.Text; //CommandType.StoredProcedure; //check why StoredProcedure didn't work;
@@ -99,12 +100,13 @@ namespace ProductionQueryLib{
                 line.Add(platformVariable,reader.GetString(3));
                 line.Add(countVariable, reader.GetDecimal(7)); //confirm the int used in the read
                 //System.Console.WriteLine("Transaction: {0} {1} {2} ", reader.GetString(0), reader.GetString(1), reader.GetDecimal(7));
-                countProduction(line);
+                countProduction(line, workingRecord);
             }
             connection.Close();
+            countRecord=workingRecord;
         }
 
-        public void countProduction(Dictionary<string,object> line) 
+        public void countProduction(Dictionary<string,object> line, Dictionary<string,Dictionary<string,int>> workingRecord) 
         {
             if(!EligibleTransaction(line))// filter here to pass only relevant shops and platforms counts;
             {
@@ -115,22 +117,22 @@ namespace ProductionQueryLib{
             string platform = (string)relevantLine[platformVariable];
             int  count = System.Decimal.ToInt32((decimal)relevantLine[countVariable]);
             //append the count 
-            if (countRecord.ContainsKey(BlockName))
+            if (workingRecord.ContainsKey(BlockName))
             {
-                Dictionary<string,int> temp = countRecord[BlockName];
+                Dictionary<string,int> temp = workingRecord[BlockName];
                 //check whether the shop is present : 
                 if (temp.ContainsKey(platform))
                 {
                     temp[platform]=temp[platform]+count;
-                    countRecord[BlockName]=temp;
+                    workingRecord[BlockName]=temp;
                     return ;
                 }
                 //if the platform has been counted first time in the shop :
-                countRecord[BlockName].Add(platform,count);
+                workingRecord[BlockName].Add(platform,count);
                 return ;
             }
             //addition of new block and its entry 
-            countRecord.Add(BlockName, new Dictionary<string,int>{{platform,count}});
+            workingRecord.Add(BlockName, new Dictionary<string,int>{{platform,count}});
             return ;
         }
 

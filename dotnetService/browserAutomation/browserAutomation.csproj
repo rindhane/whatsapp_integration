@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-  <!-- KEEPING IT AS A LIBRARY
+  <!-- KEEPING IT AS A LIBRARY  
     <OutputType>Exe</OutputType>
   -->
     <TargetFramework>net6.0</TargetFramework>

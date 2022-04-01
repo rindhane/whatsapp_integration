@@ -46,6 +46,13 @@ namespace ProxyClient {
             //add proxy monitoring (arangement to keep the token alive)
             builder.Services.AddSingleton<ChromiumSession>();
             builder.Services.AddHostedService<ProxyActiveService>();
+            //remove the backgroundservice halting the host due to unhandled exception : 
+            builder.Services.Configure<HostOptions>(
+                hostOptions=>
+                {
+                    hostOptions.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+                }
+            );
             //build the app
             var app = builder.Build();
             //extracting the working port
@@ -58,6 +65,7 @@ namespace ProxyClient {
             app.MapPost("/trialMessage", trialMessage);
             app.MapPost("/notification", notification);
             app.MapPost("/productionData", getProductionData);
+            app.MapGet("/testProductionData", testProductionData);
             app.MapPost("/UserMessage", ()=>"result achieved");
             app.MapPost("/MessageStatus", ()=>"status received");
             //to serve files
@@ -121,10 +129,52 @@ namespace ProxyClient {
             //string paramString= await reader.ReadToEndAsync();
             logger.writeNotification($"productionData> {JsonConvert.SerializeObject(result)}");
             //generate production Message for People to the group A people
-            //all persons are withing the group A
+            //all persons are within the group A
             string group="A";
             //currently there is no production segregation strategy write function for it.  
-            string notification = Templates.productionUpdate_message(result);
+            //string notification = Templates.productionUpdate_message(result); //earlier template message which has been discarded 
+            string notification = Templates.productionFormattedUpdate_message(result);
+            DialogFlow.sendProductionUpdate(notification,client, model, logger, group);
+            await contxt.Response.WriteAsync("production details Updated");
+            //return new { id = 1 };
+        }
+
+    static async Task testProductionData( HttpContext contxt,
+                                            ImessageClient client,
+                                            IlogWriter logger,
+                                            IDbModel model)
+        {
+            //StreamReader reader = new StreamReader(contxt.Request.Body);
+            //string paramString= await reader.ReadToEndAsync();
+            Dictionary<string,Dictionary<string, int>> result = new Dictionary<string, Dictionary<string, int>>();
+            result.Add("Q Block", new Dictionary<string, int>{
+                {"LTV",30},
+                {"MPV",20}
+            });
+            result.Add("P Block", new Dictionary<string, int>{
+                {"HCV",30},
+                {"ICV",201},
+                {"LCV",16}
+            });
+            result.Add("R Block", new Dictionary<string, int>{
+                {"BLR",2},
+                {"BLRPICKUP",12},
+                {"BLR108",0}
+            });
+            result.Add("S Block", new Dictionary<string, int>{
+                {"S101",32},
+                {"W601",591}
+            });
+            result.Add("T Block", new Dictionary<string, int>{
+                {"Z101",2},
+                {"U301",22}
+            });
+            logger.writeNotification($"productionData> {JsonConvert.SerializeObject(result)}");
+            //generate production Message for People to the group A people
+            //all persons are within the group A
+            string group="A";
+            //currently there is no production segregation strategy write function for it.  
+            string notification = Templates.productionFormattedUpdate_message(result);
             DialogFlow.sendProductionUpdate(notification,client, model, logger, group);
             await contxt.Response.WriteAsync("production details Updated");
             //return new { id = 1 };

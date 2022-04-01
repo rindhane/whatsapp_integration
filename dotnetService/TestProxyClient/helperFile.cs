@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using LoggingLib;
 using System;
 using System.Globalization;
+using System.Linq;
 
 namespace ProxyClient {
     public static class Templates {
@@ -23,22 +24,22 @@ namespace ProxyClient {
             int LTV=0 ;
             int MPV=0;
             QBlock.TryGetValue("LTV",out LTV);
-            QBlock.TryGetValue("LTV",out MPV);
-            Dictionary<string, int> PBlock = result["Q Block"];
+            QBlock.TryGetValue("MPV",out MPV);
+            Dictionary<string, int> PBlock = result["P Block"];
             int HCV=0 ;
             int ICV=0;
             int LCV=0;
             PBlock.TryGetValue("HCV",out HCV);
             PBlock.TryGetValue("ICV",out ICV);
             PBlock.TryGetValue("LCV",out LCV);
-            Dictionary<string, int> RBlock = result["Q Block"];
+            Dictionary<string, int> RBlock = result["R Block"];
             int BLR=0 ;
             int BLRPICKUP=0;
             int BLR108=0;
             RBlock.TryGetValue("BLR",out BLR);
             RBlock.TryGetValue("BLRPICKUP",out BLRPICKUP);
             RBlock.TryGetValue("BLR108",out BLR108);
-            Dictionary<string, int> SBlock = result["Q Block"];
+            Dictionary<string, int> SBlock = result["S Block"];
             int S101=0 ;
             int W601=0;
             SBlock.TryGetValue("S101",out S101);
@@ -51,6 +52,77 @@ namespace ProxyClient {
             return 
             $"Production Update:\nQ Block >> LTV:{LTV} |MPV:{MPV} \nP Block >> HCV:{HCV} |ICV:{ICV} |LCV:{LCV} \nR Block >> BLR:{BLR} |BLRPICKUP:{BLRPICKUP} |BLR108:{BLR108} \nS Block >> S101:{S101} |W601:{W601} \nT Block >> Z101:{Z101} |U301:{U301}";
         }
+        public static string productionFormattedUpdate_message(Dictionary<string,Dictionary<string, int>> result){
+            Dictionary<string, int> QBlock = result["Q Block"];
+            int LTV=0 ;
+            int MPV=0;
+            QBlock.TryGetValue("LTV",out LTV);
+            QBlock.TryGetValue("MPV",out MPV);
+            Dictionary<string, int> PBlock = result["P Block"];
+            int HCV=0 ;
+            int ICV=0;
+            int LCV=0;
+            PBlock.TryGetValue("HCV",out HCV);
+            PBlock.TryGetValue("ICV",out ICV);
+            PBlock.TryGetValue("LCV",out LCV);
+            Dictionary<string, int> RBlock = result["R Block"];
+            int BLR=0 ;
+            int BLRPICKUP=0;
+            int BLR108=0;
+            RBlock.TryGetValue("BLR",out BLR);
+            RBlock.TryGetValue("BLRPICKUP",out BLRPICKUP);
+            RBlock.TryGetValue("BLR108",out BLR108);
+            Dictionary<string, int> SBlock = result["S Block"];
+            int S101=0 ;
+            int W601=0;
+            SBlock.TryGetValue("S101",out S101);
+            SBlock.TryGetValue("W601",out W601);
+            Dictionary<string, int> TBlock = result["T Block"];
+            int Z101=0 ;
+            int U301=0;
+            TBlock.TryGetValue("Z101",out Z101);
+            TBlock.TryGetValue("U301",out U301);
+            //string building 
+            int count = 0;
+            string dateTitle=DateTime.Now.ToLongDateString();
+            string TimeTillDay = DateTime.Now.ToString("hh:mm tt");
+            string monospace = "```";
+            string divider =     "+---+---+---------+----+----+\n";
+            string header =      "|BLK|SHP| PLATFRM | ACT| TOT|\n";
+            string main = monospace+"\n"
+                                +dateTitle+"\n"
+                                +"\n" //gap line 
+                                +$"Production Status till {TimeTillDay}"+"\n"
+                                +"\n" //gap line 
+                                +divider + header + divider 
+                              + $"| Q |TCF|  LTV    | {Templates.constSpace(LTV)}| {Templates.constSpace(LTV+MPV)}|"+"\n"
+                              + $"|   |   |  MPV    | {Templates.constSpace(MPV)}|    |"+"\n"
+                              +divider 
+                              + $"| P |TCF|  HCV    | {Templates.constSpace(HCV)}| {Templates.constSpace(HCV+ICV+LCV)}|"+"\n"
+                              + $"|   |   |  ICV    | {Templates.constSpace(ICV)}|    |"+"\n"
+                              + $"|   |   |  LCV    | {Templates.constSpace(LCV)}|    |"+"\n"
+                              + divider 
+                              + $"| R |TCF|  BLR    | {Templates.constSpace(BLR)}| {Templates.constSpace(BLR+BLRPICKUP+BLR108)}|"+"\n"
+                              + $"|   |   |BLRPICKUP| {Templates.constSpace(BLRPICKUP)}|    |"+"\n"
+                              + $"|   |   |  BLR108 | {Templates.constSpace(BLR108)}|    |"+"\n"
+                              +divider
+                              + $"| S |TCF|  S101   | {Templates.constSpace(S101)}| {Templates.constSpace(S101+W601)}|"+"\n"
+                              + $"|   |   |  W601   | {Templates.constSpace(W601)}|    |"+"\n"
+                              +divider
+                              + $"| T |TCF|  Z101   | {Templates.constSpace(Z101)}| {Templates.constSpace(Z101+U301)}|"+"\n"
+                              + $"|   |   |  U301   | {Templates.constSpace(U301)}|    |"+"\n"
+                              +divider+monospace;
+            Console.Write("\n"+main+"\n");
+            return main;
+        }
+        public static string constSpace(int count){
+            int FixWidth=3;
+            string temp = $"{count}";
+            int length = temp.Length;
+            return temp+String.Concat(Enumerable.Repeat(" ", FixWidth-length));
+
+        }
+
     }
     public static class HandlingPostForm 
     {

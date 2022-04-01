@@ -64,9 +64,10 @@ namespace ProxyClient {
                     )//check whether unix time is greather than threshold;
                 {
                     //if larger then send the notification;
+                    try {
                     string message = Templates.escalation_Message(
                         (string)notification[0],
-                        DateTimeOffset.FromUnixTimeSeconds((long)diff).ToString()//received (string)notification[1] timestamp useinstead //diff.ToString()need unix seconds to timespan;
+                        TimeSpan.FromSeconds(diff).ToString()//received (string)notification[1] timestamp
                         );
                     //only sending the notification to users in specific group level for the notification
                     string group=getEscalationGroup(escalationState);
@@ -79,6 +80,9 @@ namespace ProxyClient {
                         (string) notification[2],
                         action,
                         escalationState);
+                    }catch(Exception e){
+                        _logger.writeNotification($"EscalationError: {e.Message} with state:{escalationState} of Message:{(string)notification[0]}");
+                    }
                 } 
                 //do nothing if the date within escalation slab
                 //Console.WriteLine("Nothing happened");

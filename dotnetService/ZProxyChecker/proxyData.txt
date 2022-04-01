@@ -1,0 +1,4 @@
+proxyUrl=http://url.com
+ProxyUsername=UserName
+ProxyPassword=abcpassword
+testURL=http://google.com/
