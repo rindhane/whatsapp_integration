@@ -29,6 +29,7 @@ namespace ProxyClient {
                                     optional:true,
                                     reloadOnChange:true);
             });
+            //getting the builder ready;
             //Adding Services
             //instantiating the twilio client
             builder.Services.AddSingleton<ImessageClient,Client>();
@@ -36,16 +37,15 @@ namespace ProxyClient {
             builder.Services.AddTransient<IDbModel, DbConnection>();
             //instantiating the logger
             builder.Services.AddTransient<IlogWriter, logWriter>();
-            //instantiating the ProductionDataServices
-            builder.Services.AddTransient<ProductionFetcherClass>(sp=> new ProductionFetcherClass("dbData.txt"));
-            builder.Services.AddHostedService<ProductionFetcherService>();           
-            //getting the builder ready;
             //add background services 
             builder.Services.AddSingleton<EscalationService>();
             builder.Services.AddHostedService<EscalationBackgroundService>();
             //add proxy monitoring (arangement to keep the token alive)
             builder.Services.AddSingleton<ChromiumSession>();
             builder.Services.AddHostedService<ProxyActiveService>();
+            //instantiating the ProductionDataServices
+            builder.Services.AddTransient<ProductionFetcherClass>(sp=> new ProductionFetcherClass("dbData.txt"));
+            builder.Services.AddHostedService<ProductionFetcherService>();           
             //remove the backgroundservice halting the host due to unhandled exception : 
             builder.Services.Configure<HostOptions>(
                 hostOptions=>
