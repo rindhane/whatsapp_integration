@@ -71,7 +71,11 @@ namespace ProxyClient {
                         );
                     //only sending the notification to users in specific group level for the notification
                     string group=getEscalationGroup(escalationState);
+                    //stopping the notifications for testing 
+                        //make the below statement into the comment to prvent it to send the notification
                     DialogFlow.sendNotificationMessage(message,_client, _model, _logger, group);
+                        //uncomment the below statement for logging the message instead of sending it : 
+                        //_logger.writeNotification($"NotSentMessage:{message}");
                     escalationState++;// increment the escalation state ;
                     //write the new increment into the database.
                     int action=Classifiers.statusEncoders((string)notification[2]);

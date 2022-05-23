@@ -113,7 +113,11 @@ namespace ProxyClient {
                 parameters[0], parameters[1], parameters[2], parameters[3]);
             //only sending the notification to users in group-level A for instant notification
             string group="A"; //change to group A
+            //preventing to send the notification message
+                //quote the below statement to not send the notification through twilio 
             DialogFlow.sendNotificationMessage(notification,client, model, logger, group);
+                //unquote the below line to log the message instead of sending it.
+                //logger.writeNotification($"notification-not-sent:{notification}");
             await contxt.Response.WriteAsync("notification obtained");
             //return new { id = 1 };
         }

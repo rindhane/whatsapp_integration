@@ -89,8 +89,9 @@ namespace ProxyClient {
             TBlock.TryGetValue("U301",out U301);
             //string building 
             int count = 0;
-            string dateTitle=DateTime.Now.ToLongDateString();
-            string TimeTillDay = DateTime.Now.ToString("hh:mm tt");
+            DateTime corrected = DateTime.Now.Add(new TimeSpan(0,0,0));//to setup manual correction if wrong date time setup on the server
+            string dateTitle=corrected.ToLongDateString();
+            string TimeTillDay = corrected.ToString("hh:mm tt");
             string monospace = "```";
             string divider =     "+---+---+---------+---+----+\n";
             string header =      "|BLK|SHP| PLATFRM |ACT| TOT|\n";
